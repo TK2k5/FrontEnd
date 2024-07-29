@@ -19,6 +19,12 @@ export default {
         green: {
           DEFAULT: '#00B69B'
         }
+      },
+      height: {
+        header: '70px'
+      },
+      fontFamily: {
+        'nunito-sans': ['Nunito Sans', 'sans-serif']
       }
     }
   },
