@@ -10,7 +10,7 @@ const RootLayout = () => {
         <SideBar />
       </Layout.Sider>
       <Layout>
-        <Layout.Header className='!bg-white'>
+        <Layout.Header className='!bg-white !px-8'>
           <Header />
         </Layout.Header>
         <Layout.Content>

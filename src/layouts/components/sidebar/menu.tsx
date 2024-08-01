@@ -1,14 +1,23 @@
-import { AppstoreOutlined, ProductOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons'
+import { AppstoreOutlined } from '@ant-design/icons'
+import { DashboardIcon } from '@/components/icons'
 
-import type { MenuProps } from 'antd'
-
-export type MenuItem = Required<MenuProps>['items'][number]
-
-const items: MenuItem[] = [
-  { key: '1', icon: <AppstoreOutlined height={22} width={22} />, label: 'DashBoard' },
-  { key: '2', icon: <ShoppingCartOutlined height={22} width={22} />, label: 'Các đơn hàng' },
-  { key: '3', icon: <ProductOutlined height={22} width={22} />, label: 'Sản phẩm' },
-  { key: '4', icon: <UserOutlined height={22} width={22} />, label: 'Người dùng' }
+export const menus = [
+  {
+    id: 1,
+    title: 'Dashboard',
+    icon: <DashboardIcon className='fill-inherit' />,
+    link: '/'
+  },
+  {
+    id: 2,
+    title: 'Các đơn hàng',
+    icon: <AppstoreOutlined />,
+    link: '/orders'
+  },
+  {
+    id: 3,
+    title: 'Sản phẩm',
+    icon: <AppstoreOutlined />,
+    link: '/products'
+  }
 ]
-
-export default items
