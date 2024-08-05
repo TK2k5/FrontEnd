@@ -1,10 +1,14 @@
 import { ArrowDownCircleIcon } from '@/components/icons'
 import { Dropdown } from 'antd'
-import { itemsUser } from './init'
+import { itemUser } from './init'
+import { useTranslation } from 'react-i18next'
 
 const InfoUser = () => {
+  const { t } = useTranslation()
+
+  const items = itemUser(t)
   return (
-    <Dropdown menu={{ items: itemsUser }}>
+    <Dropdown menu={{ items }}>
       <div className='flex items-center gap-4'>
         <img
           alt='avt'

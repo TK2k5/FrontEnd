@@ -1,0 +1,11 @@
+{
+  "title": "Chào mừng đến với bảng điều khiển quản trị",
+  "languages": {
+    "en": "Tiếng Anh",
+    "vi": "Tiếng Việt"
+  },
+  "userMenu": {
+    "profile": "Thông tin cá nhân",
+    "logout": "Đăng xuất"
+  }
+}

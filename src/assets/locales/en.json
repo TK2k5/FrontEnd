@@ -1,0 +1,11 @@
+{
+  "title": "Welcome to the admin panel",
+  "languages": {
+    "en": "English",
+    "vi": "Vietnamese"
+  },
+  "userMenu": {
+    "profile": "Profile",
+    "logout": "Logout"
+  }
+}
