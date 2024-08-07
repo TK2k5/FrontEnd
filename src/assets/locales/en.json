@@ -7,5 +7,26 @@
   "userMenu": {
     "profile": "Profile",
     "logout": "Logout"
+  },
+  "form": {
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset password",
+    "sendPasswordResetEmail": "Send password reset email",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "validate": {
+    "required": "This field is required",
+    "email": "Invalid email address",
+    "min": "Must be at least {min} characters",
+    "max": "Must be at most {max} characters",
+    "confirmPassword": "Passwords do not match"
   }
 }
