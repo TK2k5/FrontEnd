@@ -1,10 +1,44 @@
-import { Button, Form, Input } from 'antd'
+import { Button, Form, Input, message } from 'antd'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { Link } from 'react-router-dom'
+import { TBodyLogin } from '@/types/auth/auth.type'
+import { login } from '@/apis/auth/auth.api'
+import { setAccessToken } from '@/stores/slices/auth.slice'
+import { useAppDispatch } from '@/stores/hook'
+import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const LoginPage = () => {
   const { t } = useTranslation()
+  const [form] = Form.useForm()
+  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const dispatch = useAppDispatch()
+
+  const loginMutation = useMutation({
+    mutationKey: ['auth-login'],
+    mutationFn: (body: TBodyLogin) => login(body),
+    onSuccess: (data) => {
+      setIsLoading(false)
+      message.success('Login success')
+
+      // set token to local storage or cookie
+      dispatch(setAccessToken(data.accessToken))
+
+      // redirect to home page
+      navigate('/')
+    },
+    onError: () => {
+      setIsLoading(false)
+      message.error('Login failed')
+    }
+  })
+
+  const onSubmit = (values: TBodyLogin) => {
+    setIsLoading(true)
+    loginMutation.mutate(values)
+  }
 
   return (
     <div className='flex flex-col justify-center w-full h-full gap-2.5 md:w-2/3 lg:w-full'>
@@ -19,7 +53,7 @@ const LoginPage = () => {
         </p>
       </div>
 
-      <Form layout='vertical' className='mt-[35px]'>
+      <Form layout='vertical' className='mt-[35px]' onFinish={onSubmit} form={form}>
         <Form.Item
           name={'email'}
           label={<span className='font-semibold'>{t('form.email')}</span>}
@@ -44,7 +78,13 @@ const LoginPage = () => {
               </Link>
             </div>
           }
-          rules={[{ required: true, message: t('validate.required') }]}
+          rules={[
+            { required: true, message: t('validate.required') },
+            {
+              min: 6,
+              message: t('validate.min', { count: 6 })
+            }
+          ]}
         >
           <Input.Password placeholder='Password' className='h-[48px] w-full' />
         </Form.Item>
@@ -54,7 +94,7 @@ const LoginPage = () => {
           htmlType='submit'
           className='h-[48px] mt-5 w-full bg-[#4F46E5] hover:!bg-[#4F46E5] text-base'
         >
-          {t('form.login')}
+          {isLoading ? 'Loading...' : t('form.login')}
         </Button>
       </Form>
     </div>
