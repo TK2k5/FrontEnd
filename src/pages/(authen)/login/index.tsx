@@ -26,12 +26,11 @@ const LoginPage = () => {
       // set token to local storage or cookie
       dispatch(setAccessToken(data.accessToken))
 
-      // redirect to home page
+      // redirect to home pages
       navigate('/')
     },
     onError: () => {
       setIsLoading(false)
-      message.error('Login failed')
     }
   })
 
