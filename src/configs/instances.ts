@@ -1,9 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 
-import { ERole } from '@/types/enums/role.enum'
-import { PayloadLogin } from '@/types/auth/auth.type'
 import { jwtDecode } from 'jwt-decode'
-import { message } from 'antd'
 
 class Http {
   instance: AxiosInstance
@@ -17,28 +14,34 @@ class Http {
     })
 
     this.requestInterceptor()
-    this.respondInterceptor()
+    this.responseInterceptor()
   }
 
   requestInterceptor() {
-    // Add a request interceptor
     this.instance.interceptors.request.use((config) => {
+      const BearerToken = config.headers.Authorization
+      const token = BearerToken ? (BearerToken as string).split(' ')[1] : null
+
+      const date = new Date()
+      if (token) {
+        const decodeToken = jwtDecode(token)
+        if (decodeToken && decodeToken.exp! < date.getTime() / 1000) {
+          console.log('object')
+        }
+      }
       return config
     })
   }
 
-  respondInterceptor() {
-    this.instance.interceptors.response.use((respond) => {
-      const token = respond.data.accessToken
-      console.log('🚀 ~ Http ~ this.instance.interceptors.response.use ~ token:', token)
-      // giải mã token
-      const decode = jwtDecode(token) as PayloadLogin
-      if (decode.role === ERole.ADMIN) {
-        return respond
+  responseInterceptor() {
+    this.instance.interceptors.response.use(
+      async (response) => {
+        return response
+      },
+      (error) => {
+        return Promise.reject(error)
       }
-      message.error('Tài khoản hoặc mật khẩu không đúng')
-      throw new Error('Tài khoản hoặc mật khẩu không đúng')
-    })
+    )
   }
 }
 

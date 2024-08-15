@@ -1,7 +1,9 @@
 import { Button, Form, Input, message } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
+import { PayloadLogin, TBodyLogin } from '@/types/auth/auth.type'
 
-import { TBodyLogin } from '@/types/auth/auth.type'
+import { ERole } from '@/types/enums/role.enum'
+import { jwtDecode } from 'jwt-decode'
 import { login } from '@/apis/auth/auth.api'
 import { setAccessToken } from '@/stores/slices/auth.slice'
 import { useAppDispatch } from '@/stores/hook'
@@ -20,17 +22,25 @@ const LoginPage = () => {
     mutationKey: ['auth-login'],
     mutationFn: (body: TBodyLogin) => login(body),
     onSuccess: (data) => {
+      const token = data.accessToken
+      // giải mã token để kiểm tra xem có phải là admin hay không
+      const decode = jwtDecode(token) as PayloadLogin
+      if (decode.role === ERole.CUSTOMER) {
+        message.error('Tài khoản hoặc mật khẩu không đúng')
+        return
+      }
+
       setIsLoading(false)
       message.success('Login success')
-
       // set token to local storage or cookie
       dispatch(setAccessToken(data.accessToken))
 
-      // redirect to home pages
+      // redirect to home page
       navigate('/')
     },
     onError: () => {
       setIsLoading(false)
+      message.error('Tài khoản hoặc mật khẩu không đúng')
     }
   })
 

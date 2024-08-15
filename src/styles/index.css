@@ -19,3 +19,11 @@
 .ant-form-item-required {
   width: 100%;
 }
+
+base {
+  @apply font-nunito-sans;
+}
+
+* {
+  @apply font-nunito-sans;
+}

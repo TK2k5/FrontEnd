@@ -131,6 +131,7 @@ export const ArrowDownSmallIcon = (props: React.SVGProps<SVGSVGElement>) => {
     </svg>
   )
 }
+
 export const ArrowDownCircleIcon = (props: React.SVGProps<SVGSVGElement>) => {
   const { height = 16, width = 16, className, ...rest } = props
   return (

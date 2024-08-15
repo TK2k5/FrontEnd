@@ -11,7 +11,8 @@ export default {
           fourth: '#6896ff'
         },
         black: {
-          DEFAULT: '#212225'
+          DEFAULT: '#212225',
+          second: '#202224'
         },
         gray: {
           DEFAULT: '#7d7c7f',
@@ -19,7 +20,8 @@ export default {
           second: '#f4f5f9',
           third: '#f5f6fa',
           fourth: '#d5d5d5',
-          fifth: '#7a7b7d'
+          fifth: '#7a7b7d',
+          six: '#c8c8c8'
         },
         green: {
           DEFAULT: '#00B69B'
