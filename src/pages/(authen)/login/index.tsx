@@ -23,6 +23,8 @@ const LoginPage = () => {
     mutationFn: (body: TBodyLogin) => login(body),
     onSuccess: (data) => {
       const token = data.accessToken
+      dispatch(setAccessToken(data.accessToken))
+
       // giải mã token để kiểm tra xem có phải là admin hay không
       const decode = jwtDecode(token) as PayloadLogin
       if (decode.role === ERole.CUSTOMER) {
@@ -33,7 +35,6 @@ const LoginPage = () => {
       setIsLoading(false)
       message.success('Login success')
       // set token to local storage or cookie
-      dispatch(setAccessToken(data.accessToken))
 
       // redirect to home page
       navigate('/')
