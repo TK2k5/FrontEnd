@@ -2,51 +2,48 @@
 
 import axios, { AxiosInstance } from 'axios'
 
-import { jwtDecode } from 'jwt-decode'
+// import { jwtDecode } from 'jwt-decode'
 
 class Http {
   instance: AxiosInstance
 
   constructor(url: string) {
     this.instance = axios.create({
-      baseURL: url,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      baseURL: url
     })
 
     this.requestInterceptor()
-    this.responseInterceptor()
+    // this.responseInterceptor()
   }
 
   requestInterceptor() {
     this.instance.interceptors.request.use(async (config) => {
-      const BearerToken = config.headers.Authorization
-      const token = BearerToken ? (BearerToken as string).split(' ')[1] : null
+      // const BearerToken = config.headers.Authorization
+      // const token = BearerToken ? (BearerToken as string).split(' ')[1] : null
 
-      const date = new Date()
+      // const date = new Date()
 
-      // Kiểm tra nếu không có token
-      if (!token) {
-        console.log('No token provided')
-        // window.location.href = '/auth/login'
-        return Promise.reject('No token provided')
-      }
+      // // Kiểm tra nếu không có token
+      // if (!token) {
+      //   console.log('No token provided')
+      //   // window.location.href = '/auth/login'
+      //   return Promise.reject('No token provided')
+      // }
 
-      try {
-        const decodeToken: any = jwtDecode(token)
+      // try {
+      //   const decodeToken: any = jwtDecode(token)
 
-        // Kiểm tra nếu token hết hạn
-        if (decodeToken && decodeToken.exp && decodeToken.exp < date.getTime() / 1000) {
-          console.log('Token expired')
-          // window.location.href = '/auth/login'
-          return Promise.reject('Token expired')
-        }
-      } catch (error) {
-        console.error('Error decoding token:', error)
-        // window.location.href = '/auth/login'
-        return Promise.reject('Invalid token')
-      }
+      //   // Kiểm tra nếu token hết hạn
+      //   if (decodeToken && decodeToken.exp && decodeToken.exp < date.getTime() / 1000) {
+      //     console.log('Token expired')
+      //     // window.location.href = '/auth/login'
+      //     return Promise.reject('Token expired')
+      //   }
+      // } catch (error) {
+      //   console.error('Error decoding token:', error)
+      //   // window.location.href = '/auth/login'
+      //   return Promise.reject('Invalid token')
+      // }
       return config
     })
   }

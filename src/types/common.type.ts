@@ -19,3 +19,8 @@ export type TImage = {
   public_id: string
   _id: string
 }
+
+export type TBaseResponseDelete = {
+  message: string
+  success: boolean
+}

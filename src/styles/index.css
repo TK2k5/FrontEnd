@@ -16,6 +16,10 @@
   display: none !important;
 }
 
+:where(.css-dev-only-do-not-override-1irk8c7).ant-pagination .ant-pagination-total-text {
+  @apply mr-auto;
+}
+
 .ant-form-item-required {
   width: 100%;
 }
