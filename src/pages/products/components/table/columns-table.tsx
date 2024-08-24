@@ -4,10 +4,17 @@ import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { TCategroyRefProduct, TProduct, TSize } from '@/types/product.type'
 import { TableColumnsType, Tag, Tooltip } from 'antd'
 
-import Delete from '@/components/delete'
 import { TImage } from '@/types/common.type'
+import { cn } from '@/utils/cn'
 
-const ColumnsTable = () => {
+interface ColumnsTableProps {
+  onDelete?: (record: TProduct) => void
+  onDetail?: (record: TProduct) => void
+  setOpenModalDelete?: (value: boolean) => void
+  rowSelections?: TProduct[]
+}
+
+const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections }: ColumnsTableProps) => {
   const columns: TableColumnsType<TProduct> = [
     {
       title: 'Thông tin sản phẩm',
@@ -111,21 +118,18 @@ const ColumnsTable = () => {
               <EditOutlined height={20} width={20} />
             </button>
             <Tooltip title={'Xoá sản phẩm'}>
-              {/* <button
-                className='h-8 px-4 border border-gray-400 rounded-l-none rounded-r-md '
-                // onClick={() => {
-                //   setOpenModalDelete(true)
-                //   setId(record._id), setQueryDelete({ is_deleted: !record.is_deleted, status: record.status })
-                // }}
+              <button
+                disabled={rowSelections && rowSelections.length > 0}
+                className={cn('h-8 px-4 border border-gray-400 rounded-l-none rounded-r-md', {
+                  'cursor-not-allowed': rowSelections && rowSelections.length > 0
+                })}
+                onClick={() => {
+                  setOpenModalDelete && setOpenModalDelete(true)
+                  onDetail && onDetail(record)
+                }}
               >
                 <DeleteOutlined height={20} width={20} className='text-red-600' />
-              </button> */}
-              <Delete
-                button={{
-                  className: 'h-8 px-4 border border-gray-400 rounded-l-none rounded-r-md',
-                  iconClassName: 'text-red-600'
-                }}
-              />
+              </button>
             </Tooltip>
           </div>
         )

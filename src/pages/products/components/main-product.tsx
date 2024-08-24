@@ -1,5 +1,5 @@
 import ColumnsTable from './table/columns-table'
-import Delete from '@/components/delete'
+import DeleteTable from '@/components/delete-table'
 import { TProduct } from '@/types/product.type'
 import { Table } from 'antd'
 import { useState } from 'react'
@@ -18,16 +18,25 @@ interface MainProductProps {
 const MainProduct = ({ products, paginate }: MainProductProps) => {
   const { _limit, _page, totalDocs, onChange } = paginate
 
-  const columns = ColumnsTable()
-
+  const [openModalDelete, setOpenModalDelete] = useState<boolean>(false)
   const [rowSelections, setRowSelections] = useState<TProduct[]>([])
-  console.log('🚀 ~ MainProduct ~ rowSelections:', rowSelections)
+  const [product, setProduct] = useState<TProduct>()
+
+  const handleDelete = (values: TProduct[] | TProduct) => {
+    if (Array.isArray(values)) {
+      console.log('Delete multiple', values)
+    } else {
+      console.log('Delete single', values)
+    }
+  }
 
   const rowSelection = {
     onChange: (_: React.Key[], selectedRows: TProduct[]) => {
       setRowSelections(selectedRows)
     }
   }
+
+  const columns = ColumnsTable({ onDelete: handleDelete, setOpenModalDelete, onDetail: setProduct, rowSelections })
 
   return (
     <div className=''>
@@ -54,53 +63,17 @@ const MainProduct = ({ products, paginate }: MainProductProps) => {
         }}
       />
 
-      {rowSelections.length > 0 && (
-        <div className='flex items-center justify-between'>
-          {/* <button className='flex items-center gap-2' onClick={() => setOpenModalDelete(true)}>
-            <DeleteOutlined />
-            Delete
-          </button> */}
-          <Delete
-            button={{
-              className: 'flex items-center gap-2',
-              title: 'Delete'
-            }}
-          />
-
-          <span className=''>{rowSelections.length} Selected</span>
-        </div>
-      )}
-
-      {/* <Modal
-        open={openModalDelete}
-        title={<p className='w-full text-2xl font-semibold text-center'>Xoá sản phẩm</p>}
-        onOk={() => {
-          setOpenModalDelete(false)
+      <DeleteTable
+        handleDelete={handleDelete}
+        openModalDelete={openModalDelete}
+        rowSelections={rowSelections}
+        setOpenModalDelete={setOpenModalDelete}
+        selectionSingle={product}
+        text={{
+          title: 'Xoá sản phẩm',
+          content: 'Bạn có chắc chắn muốn xoá sản phẩm này không? Hành động này không thể hoàn tác?'
         }}
-        closable={false}
-        onCancel={() => setOpenModalDelete(false)}
-        footer={
-          <div className='flex items-center justify-center gap-10 mt-10'>
-            <Button danger size='large' className='w-full max-w-[140px]' onClick={() => setOpenModalDelete(false)}>
-              Huỷ
-            </Button>
-            <Button
-              type='primary'
-              size='large'
-              className='w-full max-w-[140px]'
-              onClick={() => {
-                setOpenModalDelete(false)
-              }}
-            >
-              Xoá sản phẩm
-            </Button>
-          </div>
-        }
-      >
-        <p className='text-center text-gray-500'>
-          Bạn có chắc chắn muốn xoá sản phẩm này không? Hành động này không thể hoàn tác?
-        </p>
-      </Modal> */}
+      />
     </div>
   )
 }
