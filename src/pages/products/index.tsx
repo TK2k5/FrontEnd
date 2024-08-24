@@ -11,6 +11,7 @@ import { TProduct } from '@/types/product.type'
 import { TResponse } from '@/types/common.type'
 import type { TabsProps } from 'antd'
 import { useAuth } from '@/contexts/auth-context'
+import useDebounce from '@/hooks/useDebounce'
 import { useNavigate } from 'react-router-dom'
 
 const ProductPage = () => {
@@ -73,6 +74,15 @@ const ProductPage = () => {
   const handelDeleteProduct = () => {
     deleteMutation.mutate()
   }
+
+  const [inputValue, setInputValue] = useState<string>('')
+  const debouncedValue = useDebounce(inputValue, 1000)
+
+  useEffect(() => {
+    if (debouncedValue) {
+      setQuery(`?q=${debouncedValue}&_page=${paginate._page}&_limit=${paginate._limit}`)
+    }
+  }, [debouncedValue])
 
   if (isError) {
     return <div>Error</div>
@@ -188,7 +198,8 @@ const ProductPage = () => {
           type: 'primary'
         }}
         input={{
-          placeholder: 'Search for product'
+          placeholder: 'Search for product',
+          onSearch: (value) => setInputValue(value)
         }}
       />
 
