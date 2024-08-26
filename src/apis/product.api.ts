@@ -41,3 +41,19 @@ export const softDeleteProduct = async (
 
   return response.data
 }
+
+// xoá mềm nhiều sản phẩm (chuyển sản phẩm vào thùng rác)
+export const softDeleteMultipleProduct = async (ids: string, token: string) => {
+  const response = await api.patch<TBaseResponseDelete>(
+    `/product-delete-multiple?${ids}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  )
+
+  return response.data
+}

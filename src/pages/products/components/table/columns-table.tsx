@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { ClearOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { TCategroyRefProduct, TProduct, TSize } from '@/types/product.type'
 import { TableColumnsType, Tag, Tooltip } from 'antd'
 
+import { ArrowRestoreIcon } from '@/components/icons'
 import { TImage } from '@/types/common.type'
 import { cn } from '@/utils/cn'
 
@@ -51,7 +52,7 @@ const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections }:
       title: 'Category',
       dataIndex: 'category',
       key: 'category',
-      render: (category: TCategroyRefProduct, record, index) => {
+      render: (category: TCategroyRefProduct) => {
         return category.nameCategory
       }
     },
@@ -71,7 +72,7 @@ const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections }:
         const { status, is_deleted } = record
 
         return (
-          <Tag color={status === 'inactive' ? 'red' : 'green'}>
+          <Tag color={is_deleted ? 'red' : 'green'}>
             {status === 'inactive' && !is_deleted && 'Không hoạt động'}
             {status === 'active' && !is_deleted && 'Hoạt động'}
             {is_deleted && 'Đã xoá'}
@@ -83,7 +84,7 @@ const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections }:
       title: 'Available Color',
       dataIndex: 'sizes',
       key: 'sizes',
-      render: (sizes: TSize[], record: TProduct) => {
+      render: (sizes: TSize[]) => {
         return (
           <div className='flex items-center gap-3'>
             {sizes.map((size) => (
@@ -114,23 +115,51 @@ const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections }:
       render: (_: string, record: TProduct) => {
         return (
           <div className='flex items-center'>
-            <button className='h-8 px-4 border border-r-0 border-gray-400 rounded-r-none rounded-l-md '>
-              <EditOutlined height={20} width={20} />
-            </button>
-            <Tooltip title={'Xoá sản phẩm'}>
-              <button
-                disabled={rowSelections && rowSelections.length > 0}
-                className={cn('h-8 px-4 border border-gray-400 rounded-l-none rounded-r-md', {
-                  'cursor-not-allowed': rowSelections && rowSelections.length > 0
-                })}
-                onClick={() => {
-                  setOpenModalDelete && setOpenModalDelete(true)
-                  onDetail && onDetail(record)
-                }}
-              >
-                <DeleteOutlined height={20} width={20} className='text-red-600' />
-              </button>
-            </Tooltip>
+            {record.is_deleted ? (
+              <>
+                <Tooltip title={'Khôi phục sản phẩm'}>
+                  <button className='h-8 px-4 border border-r-0 border-gray-400 rounded-r-none rounded-l-md '>
+                    <ArrowRestoreIcon />
+                  </button>
+                </Tooltip>
+                <Tooltip title={'Xoá vĩnh viễn'}>
+                  <button
+                    disabled={rowSelections && rowSelections.length > 0}
+                    className={cn('h-8 px-4 border border-gray-400 rounded-l-none rounded-r-md', {
+                      'cursor-not-allowed': rowSelections && rowSelections.length > 0
+                    })}
+                    onClick={() => {
+                      setOpenModalDelete && setOpenModalDelete(true)
+                      onDetail && onDetail(record)
+                    }}
+                  >
+                    <ClearOutlined height={20} width={20} className='text-red-600' />
+                  </button>
+                </Tooltip>
+              </>
+            ) : (
+              <>
+                <Tooltip title={'Cập nhật sản phẩm'}>
+                  <button className='h-8 px-4 border border-r-0 border-gray-400 rounded-r-none rounded-l-md '>
+                    <EditOutlined height={20} width={20} />
+                  </button>
+                </Tooltip>
+                <Tooltip title={'Xoá sản phẩm'}>
+                  <button
+                    disabled={rowSelections && rowSelections.length > 0}
+                    className={cn('h-8 px-4 border border-gray-400 rounded-l-none rounded-r-md', {
+                      'cursor-not-allowed': rowSelections && rowSelections.length > 0
+                    })}
+                    onClick={() => {
+                      setOpenModalDelete && setOpenModalDelete(true)
+                      onDetail && onDetail(record)
+                    }}
+                  >
+                    <DeleteOutlined height={20} width={20} className='text-red-600' />
+                  </button>
+                </Tooltip>
+              </>
+            )}
           </div>
         )
       }
