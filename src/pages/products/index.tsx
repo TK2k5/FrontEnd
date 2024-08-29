@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
+import FomrProduct from './components/form/form-product'
 import MainProduct from './components/main-product'
 import Navbar from '@/components/navbar'
 import { TProduct } from '@/types/product.type'
@@ -31,6 +32,8 @@ const ProductPage = () => {
     _limit: 10,
     totalPages: 1
   })
+
+  const [openDrawer, setOpenDrawer] = useState<boolean>(false)
 
   const [query, setQuery] = useState<string>(`?_page=${paginate._page}&_limit=${paginate._limit}`)
 
@@ -156,7 +159,8 @@ const ProductPage = () => {
         button={{
           title: 'Thêm sản phẩm',
           size: 'large',
-          type: 'primary'
+          type: 'primary',
+          onClick: () => setOpenDrawer(true)
         }}
         input={{
           placeholder: 'Search for product',
@@ -173,6 +177,9 @@ const ProductPage = () => {
           }}
         />
       </div>
+
+      {/* form add product */}
+      <FomrProduct open={openDrawer} onClose={() => setOpenDrawer(false)} />
     </div>
   )
 }

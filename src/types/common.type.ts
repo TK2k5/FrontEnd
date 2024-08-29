@@ -14,6 +14,12 @@ export type TResponse<T> = {
   nextPage: number | null
 }
 
+export type TResponseNoPagination<Data> = {
+  message: string
+  success: boolean
+  data: Data[]
+}
+
 export type TImage = {
   url: string
   public_id: string
