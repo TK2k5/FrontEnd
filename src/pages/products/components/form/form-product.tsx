@@ -2,6 +2,7 @@ import { Button, Col, Drawer, Form, Input, Row, Select, Space, Upload, UploadPro
 import { CloseOutlined, InboxOutlined, PlusOutlined } from '@ant-design/icons'
 
 import { ArrowDownSmallIcon } from '@/components/icons'
+import { getBrands } from '@/apis/brand.api'
 import { getCategories } from '@/apis/category.api'
 import { useAuth } from '@/contexts/auth-context'
 import { useQuery } from '@tanstack/react-query'
@@ -41,8 +42,13 @@ const FomrProduct = ({ open, onClose }: IFormProductProps) => {
     queryFn: () => getCategories(accessToken)
   })
   const categories = data?.data
-  console.log('🚀 ~ FomrProduct ~ categories:', categories)
 
+  // brand
+  const { data: dataBrand, isLoading: isLoadingBrand } = useQuery({
+    queryKey: ['brands'],
+    queryFn: () => getBrands(accessToken)
+  })
+  const brands = dataBrand?.data
   return (
     <Drawer
       title='Thêm sản phẩm'
@@ -74,7 +80,16 @@ const FomrProduct = ({ open, onClose }: IFormProductProps) => {
           </Col>
           <Col span={12}>
             <Form.Item name={'brand'} label='Thương hiệu sản phẩm'>
-              <Input size='large' placeholder='Thương hiệu sản phẩm' />
+              <Select
+                loading={isLoadingBrand}
+                size='large'
+                suffixIcon={<ArrowDownSmallIcon />}
+                placeholder='Thương hiệu sản phẩm'
+                options={brands?.map((brand) => ({
+                  value: brand._id,
+                  label: brand.nameBrand
+                }))}
+              />
             </Form.Item>
           </Col>
           <Col span={12}>
