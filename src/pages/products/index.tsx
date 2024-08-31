@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -9,10 +11,11 @@ import { TResponse } from '@/types/common.type'
 import { Tabs } from 'antd'
 import type { TabsProps } from 'antd'
 import { getProducts } from '@/apis/product.api'
-import { handleChangeTab } from '@/utils/handle-change-tab'
+import { handleChangeTab } from '@/pages/products/utils/handle-change-tab'
 import { useAuth } from '@/contexts/auth-context'
 import useDebounce from '@/hooks/useDebounce'
 import { useQuery } from '@tanstack/react-query'
+import { useToggleModal } from '@/hooks/useToggleModal'
 
 const ProductPage = () => {
   // const queryClient = new QueryClient()
@@ -33,7 +36,7 @@ const ProductPage = () => {
     totalPages: 1
   })
 
-  const [openDrawer, setOpenDrawer] = useState<boolean>(false)
+  const { currentModal, onCloseModal, onOpenModal } = useToggleModal<TProduct>()
 
   const [query, setQuery] = useState<string>(`?_page=${paginate._page}&_limit=${paginate._limit}`)
 
@@ -86,6 +89,7 @@ const ProductPage = () => {
         <MainProduct
           isLoading={isFetching || isLoading}
           products={products}
+          getData={onOpenModal}
           paginate={{
             _page: paginate._page,
             _limit: paginate._limit,
@@ -160,7 +164,7 @@ const ProductPage = () => {
           title: 'Thêm sản phẩm',
           size: 'large',
           type: 'primary',
-          onClick: () => setOpenDrawer(true)
+          onClick: () => onOpenModal('add')
         }}
         input={{
           placeholder: 'Search for product',
@@ -179,7 +183,7 @@ const ProductPage = () => {
       </div>
 
       {/* form add product */}
-      <FomrProduct open={openDrawer} onClose={() => setOpenDrawer(false)} />
+      <FomrProduct currentData={currentModal} onClose={onCloseModal} />
     </div>
   )
 }

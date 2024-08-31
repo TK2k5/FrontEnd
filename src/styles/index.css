@@ -31,3 +31,11 @@ base {
 * {
   @apply font-nunito-sans;
 }
+
+.ql-toolbar.ql-snow {
+  @apply rounded-t-[4px];
+}
+
+.ql-container.ql-snow {
+  @apply rounded-b-[4px] min-h-[100px];
+}

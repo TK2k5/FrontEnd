@@ -1,3 +1,7 @@
+// style react quill
+
+import 'react-quill/dist/quill.snow.css'
+
 import { AuthProvider } from './contexts/auth-context'
 import { LanguageProvider } from './contexts/language-context'
 import { RootState } from './stores/store'

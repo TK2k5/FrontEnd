@@ -2,10 +2,10 @@
 
 import { ClearOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { TCategroyRefProduct, TProduct, TSize } from '@/types/product.type'
+import { TImage, TModalType } from '@/types/common.type'
 import { TableColumnsType, Tag, Tooltip } from 'antd'
 
 import { ArrowRestoreIcon } from '@/components/icons'
-import { TImage } from '@/types/common.type'
 import { cn } from '@/utils/cn'
 
 interface ColumnsTableProps {
@@ -13,9 +13,10 @@ interface ColumnsTableProps {
   onDetail?: (record: TProduct) => void
   setOpenModalDelete?: (value: boolean) => void
   rowSelections?: TProduct[]
+  getData?: (type: TModalType, data?: TProduct | undefined) => void
 }
 
-const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections }: ColumnsTableProps) => {
+const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections, getData }: ColumnsTableProps) => {
   const columns: TableColumnsType<TProduct> = [
     {
       title: 'Thông tin sản phẩm',
@@ -140,7 +141,10 @@ const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections }:
             ) : (
               <>
                 <Tooltip title={'Cập nhật sản phẩm'}>
-                  <button className='h-8 px-4 border border-r-0 border-gray-400 rounded-r-none rounded-l-md '>
+                  <button
+                    className='h-8 px-4 border border-r-0 border-gray-400 rounded-r-none rounded-l-md'
+                    onClick={() => getData && getData('edit', record)}
+                  >
                     <EditOutlined height={20} width={20} />
                   </button>
                 </Tooltip>

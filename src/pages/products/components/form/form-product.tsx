@@ -1,25 +1,48 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Button, Col, Drawer, Form, Input, Row, Select, Space, Upload, UploadProps, message } from 'antd'
 import { CloseOutlined, InboxOutlined, PlusOutlined } from '@ant-design/icons'
 
 import { ArrowDownSmallIcon } from '@/components/icons'
+import QuillEditor from '@/components/quill-editor'
+import ReactQuill from 'react-quill'
+import { TModal } from '@/types/common.type'
+import { TProduct } from '@/types/product.type'
 import { getBrands } from '@/apis/brand.api'
 import { getCategories } from '@/apis/category.api'
+import { uploadImage } from '@/apis/upload-image.api'
 import { useAuth } from '@/contexts/auth-context'
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
 interface IFormProductProps {
-  open: boolean
+  currentData: TModal<TProduct>
   onClose: () => void
 }
 
 const { Dragger } = Upload
 
-const FomrProduct = ({ open, onClose }: IFormProductProps) => {
+const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
   const { accessToken } = useAuth()
+
+  const [value, setValue] = useState<string>('')
 
   const props: UploadProps = {
     name: 'file',
     multiple: true,
+    customRequest({ file, onSuccess, onError }) {
+      const formData = new FormData()
+
+      formData.append('images', file)
+
+      uploadImage(formData, accessToken)
+        .then(() => {
+          onSuccess!('OK') // Gọi onSuccess khi tải lên thành công
+        })
+        .catch((error) => {
+          onError!(error) // Gọi onError khi xảy ra lỗi
+        })
+    },
     action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
     onChange(info) {
       const { status } = info.file
@@ -53,7 +76,7 @@ const FomrProduct = ({ open, onClose }: IFormProductProps) => {
     <Drawer
       title='Thêm sản phẩm'
       onClose={onClose}
-      open={open}
+      open={currentData.visiable}
       width={800}
       extra={
         <Space>
@@ -162,7 +185,8 @@ const FomrProduct = ({ open, onClose }: IFormProductProps) => {
           {/* desc */}
           <Col span={24}>
             <Form.Item name={'desc'} label='Mô tả sản phẩm'>
-              <Input.TextArea size='large' placeholder='Mô tả sản phẩm' />
+              {/* <Input.TextArea size='large' placeholder='Mô tả sản phẩm' /> */}
+              <QuillEditor value={value} onChange={(value) => setValue(value)} />
             </Form.Item>
           </Col>
 
@@ -176,6 +200,10 @@ const FomrProduct = ({ open, onClose }: IFormProductProps) => {
                 <p className='ant-upload-text'>Click hoặc kéo thả hình ảnh</p>
               </Dragger>
             </Form.Item>
+          </Col>
+
+          <Col span={24}>
+            <input type='file' id={'images'} />
           </Col>
         </Row>
       </Form>
