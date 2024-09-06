@@ -29,12 +29,14 @@ const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
 
   const props: UploadProps = {
     name: 'file',
-    multiple: true,
+    multiple: false,
+    accept: 'image/*',
     async customRequest({ file, onSuccess, onError }) {
       const formData = new FormData()
       formData.append('images', file)
+
       const response = await uploadImage(formData, accessToken)
-      console.log(response)
+      const url = response.data.urls[0].url
     },
     action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
     onChange(info) {
