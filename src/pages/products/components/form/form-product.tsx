@@ -30,18 +30,11 @@ const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
   const props: UploadProps = {
     name: 'file',
     multiple: true,
-    customRequest({ file, onSuccess, onError }) {
+    async customRequest({ file, onSuccess, onError }) {
       const formData = new FormData()
-
       formData.append('images', file)
-
-      uploadImage(formData, accessToken)
-        .then(() => {
-          onSuccess!('OK') // Gọi onSuccess khi tải lên thành công
-        })
-        .catch((error) => {
-          onError!(error) // Gọi onError khi xảy ra lỗi
-        })
+      const response = await uploadImage(formData, accessToken)
+      console.log(response)
     },
     action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
     onChange(info) {
