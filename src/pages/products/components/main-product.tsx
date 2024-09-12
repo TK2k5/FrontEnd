@@ -2,6 +2,7 @@
 
 import { QueryClient, useMutation } from '@tanstack/react-query'
 import { Table, notification } from 'antd'
+import { createSearchParams, useNavigate } from 'react-router-dom'
 
 import ColumnsTable from './table/columns-table'
 import DeleteTable from '@/components/delete-table'
@@ -25,6 +26,7 @@ interface MainProductProps {
 }
 
 const MainProduct = ({ products, paginate, isLoading, getData }: MainProductProps) => {
+  const navigate = useNavigate()
   const { _limit, _page, totalDocs, onChange } = paginate
 
   const queryClient = new QueryClient()
@@ -90,7 +92,17 @@ const MainProduct = ({ products, paginate, isLoading, getData }: MainProductProp
           current: _page,
           pageSize: _limit,
           total: totalDocs,
-          onChange: (page) => onChange(page),
+          onChange: (page, pageSize) => {
+            console.log('🚀 ~ MainProduct ~ page:', page)
+            // onChange(page),
+            navigate({
+              pathname: '/products',
+              search: createSearchParams({
+                _page: page.toString(),
+                _limit: pageSize.toString()
+              }).toString()
+            })
+          },
           showTotal(total, range) {
             return (
               <div className='flex items-center justify-between w-full mr-auto text-black-second'>

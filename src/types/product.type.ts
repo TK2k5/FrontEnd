@@ -35,3 +35,15 @@ export type TSize = {
   color: string
   _id: string
 }
+
+export type TProductForm = {
+  nameProduct: string
+  price: number
+  brand: string
+  category: string
+  sale: number
+  status: 'inactive' | 'active'
+  sizes: Omit<TSize, '_id'>[]
+  desc: string
+  images: Omit<TImage, '_id'>[]
+}

@@ -1,6 +1,6 @@
 import { TBaseResponseDelete, TResponse } from '@/types/common.type'
+import { TProduct, TProductForm } from '@/types/product.type'
 
-import { TProduct } from '@/types/product.type'
 import api from './base-url.api'
 
 export const getProducts = async (token: string, query?: string): Promise<TResponse<TProduct>> => {
@@ -54,6 +54,17 @@ export const softDeleteMultipleProduct = async (ids: string, token: string) => {
       }
     }
   )
+
+  return response.data
+}
+
+// thêm sản phẩm
+export const addProduct = async (data: TProductForm, token: string) => {
+  const response = await api.post<TResponse<TProduct>>('/product', data, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
 
   return response.data
 }

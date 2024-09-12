@@ -26,6 +26,7 @@ const ProductPage = () => {
   const [params] = useSearchParams()
   const status = params.get('status')
   const deleted = params.get('deleted')
+  const page = params.get('_page')
 
   const [products, setProducts] = useState<TProduct[]>([])
   const navigate = useNavigate()
@@ -38,9 +39,8 @@ const ProductPage = () => {
 
   const { currentModal, onCloseModal, onOpenModal } = useToggleModal<TProduct>()
 
-  const [query, setQuery] = useState<string>(`?_page=${paginate._page}&_limit=${paginate._limit}`)
-
-  const { data, isError, isLoading, isSuccess, isFetching } = useQuery<TResponse<TProduct>, Error>({
+  const [query, setQuery] = useState<string>(`?_page=${page}&_limit=${paginate._limit}`)
+  const { data, isError, isLoading, isSuccess, isFetching, refetch } = useQuery<TResponse<TProduct>, Error>({
     queryKey: ['products', query],
     queryFn: () => getProducts(accessToken, query),
     keepPreviousData: true
@@ -48,7 +48,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      setProducts(data.docs)
+      setProducts(data.docs.reverse())
       setPaginate({
         _page: data.page,
         _limit: data.limit,
@@ -183,7 +183,7 @@ const ProductPage = () => {
       </div>
 
       {/* form add product */}
-      <FomrProduct currentData={currentModal} onClose={onCloseModal} />
+      <FomrProduct currentData={currentModal} onClose={onCloseModal} refetch={refetch} />
     </div>
   )
 }

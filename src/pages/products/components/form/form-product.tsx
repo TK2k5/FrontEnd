@@ -1,42 +1,116 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { Button, Col, Drawer, Form, Input, Row, Select, Space, Upload, UploadProps, message } from 'antd'
+import {
+  Button,
+  Col,
+  Drawer,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Select,
+  Space,
+  Switch,
+  Upload,
+  UploadProps,
+  message
+} from 'antd'
 import { CloseOutlined, InboxOutlined, PlusOutlined } from '@ant-design/icons'
+import {
+  QueryClient,
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+  useMutation,
+  useQuery
+} from '@tanstack/react-query'
+import { TModal, TResponse } from '@/types/common.type'
+import { TProduct, TProductForm } from '@/types/product.type'
 
 import { ArrowDownSmallIcon } from '@/components/icons'
 import QuillEditor from '@/components/quill-editor'
-import ReactQuill from 'react-quill'
-import { TModal } from '@/types/common.type'
-import { TProduct } from '@/types/product.type'
+import { addProduct } from '@/apis/product.api'
 import { getBrands } from '@/apis/brand.api'
 import { getCategories } from '@/apis/category.api'
 import { uploadImage } from '@/apis/upload-image.api'
 import { useAuth } from '@/contexts/auth-context'
-import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 interface IFormProductProps {
   currentData: TModal<TProduct>
   onClose: () => void
+  refetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
+  ) => Promise<QueryObserverResult<TResponse<TProduct>, Error>>
+}
+
+interface Image {
+  url: string
+  public_id: string
 }
 
 const { Dragger } = Upload
 
-const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
+const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
   const { accessToken } = useAuth()
 
+  const [form] = Form.useForm<TProductForm>()
+  const queryClient = new QueryClient()
+
+  const [paginate, setPaginate] = useState({
+    _page: 1,
+    _limit: 10,
+    totalPages: 1
+  })
+  const [query, setQuery] = useState<string>(`?_page=${paginate._page}&_limit=${paginate._limit}`)
+
+  const createProductMutation = useMutation({
+    mutationKey: ['createProduct'],
+    mutationFn: (product: TProductForm) => addProduct(product, accessToken),
+    onSuccess: () => {
+      message.success('Thêm sản phẩm thành công')
+      onClose()
+      form.resetFields()
+      setImage({ url: '', public_id: '' })
+      setValue('')
+      refetch()
+      queryClient.invalidateQueries({ queryKey: ['products', query] })
+    },
+    onError: () => {
+      message.error('Thêm sản phẩm thất bại')
+    }
+  })
+
+  // lưu trữ văn bản từ text editor
   const [value, setValue] = useState<string>('')
+  const [image, setImage] = useState<Image>({ url: '', public_id: '' })
 
   const props: UploadProps = {
     name: 'file',
     multiple: false,
+    maxCount: 1,
+    listType: 'picture',
     accept: 'image/*',
     async customRequest({ file, onSuccess, onError }) {
       const formData = new FormData()
       formData.append('images', file)
 
       const response = await uploadImage(formData, accessToken)
-      const url = response.data.urls[0].url
+      const urlInfo: Image = response.data.urls[0]
+
+      if (urlInfo) {
+        setImage({
+          url: urlInfo.url,
+          public_id: urlInfo.public_id
+        })
+        onSuccess && onSuccess(urlInfo)
+      } else {
+        onError &&
+          onError({
+            name: 'error',
+            message: 'Lỗi khi upload ảnh'
+          })
+      }
     },
     action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
     onChange(info) {
@@ -67,6 +141,22 @@ const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
     queryFn: () => getBrands(accessToken)
   })
   const brands = dataBrand?.data
+
+  const onSubmit = (data: TProductForm) => {
+    if (!data.sizes) {
+      message.error('Vui lòng thêm size sản phẩm')
+      return
+    }
+
+    const dataProduct: TProductForm = {
+      ...data,
+      sale: data.sale || 0,
+      status: data.status ? 'active' : 'inactive',
+      images: [image]
+    }
+
+    createProductMutation.mutate(dataProduct)
+  }
   return (
     <Drawer
       title='Thêm sản phẩm'
@@ -78,26 +168,44 @@ const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
           <Button size='large' onClick={onClose}>
             Đóng sản phẩm
           </Button>
-          <Button size='large' onClick={onClose} type='primary'>
+          <Button
+            size='large'
+            type='primary'
+            onClick={() => form.submit()}
+            disabled={createProductMutation.isLoading}
+            loading={createProductMutation.isLoading}
+          >
             Thêm sản phẩm
           </Button>
         </Space>
       }
     >
-      <Form layout='vertical'>
+      <Form layout='vertical' form={form} onFinish={onSubmit}>
         <Row gutter={40}>
           <Col span={12}>
-            <Form.Item name={'nameProduct'} label='Tên sản phẩm'>
+            <Form.Item
+              name={'nameProduct'}
+              label='Tên sản phẩm'
+              rules={[{ required: true, message: 'Tên sản phẩm là bắt buộc' }]}
+            >
               <Input size='large' placeholder='Tên sản phẩm' />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name={'price'} label='Giá sản phẩm'>
-              <Input size='large' placeholder='Giá sản phẩm' />
+            <Form.Item
+              name={'price'}
+              label='Giá sản phẩm'
+              rules={[{ required: true, message: 'Giá sản phẩm là bắt buộc' }]}
+            >
+              <InputNumber className='w-full' size='large' placeholder='Giá sản phẩm' />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name={'brand'} label='Thương hiệu sản phẩm'>
+            <Form.Item
+              name={'brand'}
+              label='Thương hiệu sản phẩm'
+              rules={[{ required: true, message: 'Thương hiệu sản phẩm là bắt buộc' }]}
+            >
               <Select
                 loading={isLoadingBrand}
                 size='large'
@@ -111,7 +219,11 @@ const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name={'category'} label='Danh mục sản phẩm'>
+            <Form.Item
+              name={'category'}
+              label='Danh mục sản phẩm'
+              rules={[{ required: true, message: 'Danh mục sản phẩm là bắt buộc' }]}
+            >
               <Select
                 loading={isLoading}
                 size='large'
@@ -125,19 +237,34 @@ const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name={'status'} label='Trạng thái sản phẩm'>
-              <Input size='large' placeholder='Trạng thái sản phẩm' />
+            <Form.Item
+              name={'sale'}
+              label='Giá khuyến mại sản phẩm'
+              rules={[
+                // giá khuyến mại luôn nhỏ hơn giá sản phẩm
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    const price = getFieldValue('price')
+                    if (!value || value < price) {
+                      return Promise.resolve()
+                    }
+                    return Promise.reject(new Error('Giá khuyến mại phải nhỏ hơn giá sản phẩm'))
+                  }
+                })
+              ]}
+            >
+              <InputNumber className='w-full' size='large' placeholder='Giá khuyến mại sản phẩm' />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name={'sale'} label='Giá khuyến mại sản phẩm'>
-              <Input size='large' placeholder='Giá khuyến mại sản phẩm' />
+            <Form.Item name={'status'} label='Trạng thái sản phẩm'>
+              <Switch />
             </Form.Item>
           </Col>
 
           <Col span={24}>
-            <Form.Item label='Size sản phẩm' name='sizes' className='!mb-0'>
-              <Form.List name='users'>
+            <Form.Item label='Size sản phẩm' className='!mb-0' rules={[{ required: true, message: 'Size sản phẩm' }]}>
+              <Form.List name='sizes'>
                 {(fields, { add, remove }) => (
                   <>
                     {fields.map(({ key, name, ...restField }) => (
@@ -151,17 +278,17 @@ const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
                         </Form.Item>
                         <Form.Item
                           {...restField}
-                          name={[name, 'last']}
+                          name={[name, 'quantity']}
                           rules={[{ required: true, message: 'Số lượng' }]}
                         >
-                          <Input size='large' placeholder='Số lượng' />
+                          <InputNumber className='w-full' size='large' placeholder='Số lượng' />
                         </Form.Item>
                         <Form.Item
                           {...restField}
-                          name={[name, 'last']}
+                          name={[name, 'color']}
                           rules={[{ required: true, message: 'Màu sản phẩm' }]}
                         >
-                          <Input size='large' placeholder='Số lượng' />
+                          <Input size='large' placeholder='Màu sản phẩm' />
                         </Form.Item>
                         <CloseOutlined onClick={() => remove(name)} />
                       </Space>
@@ -187,7 +314,11 @@ const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
 
           {/* image */}
           <Col span={24}>
-            <Form.Item name={'images'} label='Hình ảnh sản phẩm'>
+            <Form.Item
+              name={'images'}
+              label='Hình ảnh sản phẩm'
+              rules={[{ required: true, message: 'Hình ảnh sản phẩm là bắt buộc' }]}
+            >
               <Dragger {...props}>
                 <p className='ant-upload-drag-icon'>
                   <InboxOutlined />
@@ -196,14 +327,10 @@ const FomrProduct = ({ currentData, onClose }: IFormProductProps) => {
               </Dragger>
             </Form.Item>
           </Col>
-
-          <Col span={24}>
-            <input type='file' id={'images'} />
-          </Col>
         </Row>
       </Form>
     </Drawer>
   )
 }
 
-export default FomrProduct
+export default FormProduct
