@@ -39,3 +39,11 @@ export type TModal<T> = {
   type: TModalType
   currentData: T | null
 }
+
+export type TQueryParams = {
+  _page?: number
+  _limit?: number
+  q?: string
+  status?: string
+  deleted?: string
+}

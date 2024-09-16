@@ -1,10 +1,11 @@
-import { TBaseResponseDelete, TResponse } from '@/types/common.type'
+import { TBaseResponseDelete, TQueryParams, TResponse } from '@/types/common.type'
 import { TProduct, TProductForm } from '@/types/product.type'
 
 import api from './base-url.api'
 
-export const getProducts = async (token: string, query?: string): Promise<TResponse<TProduct>> => {
-  const response = await api.get<TResponse<TProduct>>(`/product${query ? query : ''}`, {
+export const getProducts = async (token: string, params?: TQueryParams): Promise<TResponse<TProduct>> => {
+  const response = await api.get<TResponse<TProduct>>(`/product`, {
+    params,
     headers: {
       Authorization: `Bearer ${token}`
     }

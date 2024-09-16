@@ -34,6 +34,7 @@ import { getBrands } from '@/apis/brand.api'
 import { getCategories } from '@/apis/category.api'
 import { uploadImage } from '@/apis/upload-image.api'
 import { useAuth } from '@/contexts/auth-context'
+import { useQueryParams } from '@/hooks/useQueryParams'
 import { useState } from 'react'
 
 interface IFormProductProps {
@@ -53,6 +54,7 @@ const { Dragger } = Upload
 
 const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
   const { accessToken } = useAuth()
+  const queryParams = useQueryParams()
 
   const [form] = Form.useForm<TProductForm>()
   const queryClient = new QueryClient()
@@ -74,7 +76,7 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
       setImage({ url: '', public_id: '' })
       setValue('')
       refetch()
-      queryClient.invalidateQueries({ queryKey: ['products', query] })
+      queryClient.invalidateQueries({ queryKey: ['products', queryParams] })
     },
     onError: () => {
       message.error('Thêm sản phẩm thất bại')
@@ -131,14 +133,16 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => getCategories(accessToken)
+    queryFn: () => getCategories(accessToken),
+    enabled: currentData.visiable
   })
   const categories = data?.data
 
   // brand
   const { data: dataBrand, isLoading: isLoadingBrand } = useQuery({
     queryKey: ['brands'],
-    queryFn: () => getBrands(accessToken)
+    queryFn: () => getBrands(accessToken),
+    enabled: currentData.visiable
   })
   const brands = dataBrand?.data
 
