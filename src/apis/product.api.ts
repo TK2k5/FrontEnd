@@ -1,5 +1,5 @@
 import { TBaseResponseDelete, TQueryParams, TResponse } from '@/types/common.type'
-import { TProduct, TProductForm } from '@/types/product.type'
+import { TProduct, TProductForm, TProductFormEdit } from '@/types/product.type'
 
 import api from './base-url.api'
 
@@ -68,4 +68,15 @@ export const addProduct = async (data: TProductForm, token: string) => {
   })
 
   return response.data
+}
+
+// cập nhật lại sản phẩm
+export const editProduct = async (data: TProductFormEdit, token: string) => {
+  const reponse = await api.put<TResponse<TProduct>>(`/product/${data._id}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+  return reponse.data
 }

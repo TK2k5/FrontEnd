@@ -47,3 +47,5 @@ export type TProductForm = {
   desc: string
   images: Omit<TImage, '_id'>[]
 }
+
+export type TProductFormEdit = TProductForm & { _id: string }

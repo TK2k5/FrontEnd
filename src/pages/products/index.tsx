@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { createSearchParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { createSearchParams, useNavigate } from 'react-router-dom'
 import { memo, useEffect, useState } from 'react'
 
 import FomrProduct from './components/form/form-product'
@@ -12,16 +12,12 @@ import { TResponse } from '@/types/common.type'
 import { Tabs } from 'antd'
 import type { TabsProps } from 'antd'
 import { getProducts } from '@/apis/product.api'
-import { handleChangeTab } from '@/pages/products/utils/handle-change-tab'
 import { useAuth } from '@/contexts/auth-context'
-import useDebounce from '@/hooks/useDebounce'
 import { useQuery } from '@tanstack/react-query'
 import { useQueryParams } from '@/hooks/useQueryParams'
 import { useToggleModal } from '@/hooks/useToggleModal'
 
 const ProductPage = () => {
-  // const queryClient = new QueryClient()
-
   const { accessToken } = useAuth()
 
   // lấy ra các dữ liệu trên url

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { QueryClient, useMutation } from '@tanstack/react-query'
 import { TModalType, TQueryParams } from '@/types/common.type'
 import { Table, notification } from 'antd'
 import { createSearchParams, useNavigate } from 'react-router-dom'
@@ -10,6 +9,7 @@ import DeleteTable from '@/components/delete-table'
 import { TProduct } from '@/types/product.type'
 import { softDeleteMultipleProduct } from '@/apis/product.api'
 import { useAuth } from '@/contexts/auth-context'
+import { useMutation } from '@tanstack/react-query'
 import { useQueryParams } from '@/hooks/useQueryParams'
 import { useState } from 'react'
 
@@ -25,8 +25,6 @@ const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductPro
   const navigate = useNavigate()
   const queryParams: TQueryParams = useQueryParams()
   const { _limit, _page } = queryParams
-
-  const queryClient = new QueryClient()
 
   const { accessToken } = useAuth()
 

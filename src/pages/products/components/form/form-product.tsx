@@ -5,6 +5,7 @@ import {
   Col,
   Drawer,
   Form,
+  Image,
   Input,
   InputNumber,
   Row,
@@ -25,17 +26,17 @@ import {
   useQuery
 } from '@tanstack/react-query'
 import { TModal, TResponse } from '@/types/common.type'
-import { TProduct, TProductForm } from '@/types/product.type'
+import { TProduct, TProductForm, TProductFormEdit } from '@/types/product.type'
+import { addProduct, editProduct } from '@/apis/product.api'
+import { useEffect, useState } from 'react'
 
 import { ArrowDownSmallIcon } from '@/components/icons'
 import QuillEditor from '@/components/quill-editor'
-import { addProduct } from '@/apis/product.api'
 import { getBrands } from '@/apis/brand.api'
 import { getCategories } from '@/apis/category.api'
 import { uploadImage } from '@/apis/upload-image.api'
 import { useAuth } from '@/contexts/auth-context'
 import { useQueryParams } from '@/hooks/useQueryParams'
-import { useState } from 'react'
 
 interface IFormProductProps {
   currentData: TModal<TProduct>
@@ -48,6 +49,7 @@ interface IFormProductProps {
 interface Image {
   url: string
   public_id: string
+  visiable: boolean
 }
 
 const { Dragger } = Upload
@@ -56,7 +58,7 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
   const { accessToken } = useAuth()
   const queryParams = useQueryParams()
 
-  const [form] = Form.useForm<TProductForm>()
+  const [form] = Form.useForm()
   const queryClient = new QueryClient()
 
   const [paginate, setPaginate] = useState({
@@ -73,7 +75,7 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
       message.success('Thêm sản phẩm thành công')
       onClose()
       form.resetFields()
-      setImage({ url: '', public_id: '' })
+      setImage({ url: '', public_id: '', visiable: false })
       setValue('')
       refetch()
       queryClient.invalidateQueries({ queryKey: ['products', queryParams] })
@@ -83,9 +85,26 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
     }
   })
 
+  const editProductMutation = useMutation({
+    mutationKey: ['editProduct'],
+    mutationFn: (data: TProductFormEdit) => editProduct(data, accessToken),
+    onSuccess: () => {
+      message.success('Cập nhật sản phẩm thành công')
+      onClose()
+      form.resetFields()
+      setImage({ url: '', public_id: '', visiable: false })
+      setValue('')
+      refetch()
+      queryClient.invalidateQueries({ queryKey: ['products', queryParams] })
+    },
+    onError: () => {
+      message.error('Cập nhật sản phẩm thất bại')
+    }
+  })
+
   // lưu trữ văn bản từ text editor
   const [value, setValue] = useState<string>('')
-  const [image, setImage] = useState<Image>({ url: '', public_id: '' })
+  const [image, setImage] = useState<Image>({ url: '', public_id: '', visiable: false })
 
   const props: UploadProps = {
     name: 'file',
@@ -103,7 +122,8 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
       if (urlInfo) {
         setImage({
           url: urlInfo.url,
-          public_id: urlInfo.public_id
+          public_id: urlInfo.public_id,
+          visiable: false
         })
         onSuccess && onSuccess(urlInfo)
       } else {
@@ -156,14 +176,51 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
       ...data,
       sale: data.sale || 0,
       status: data.status ? 'active' : 'inactive',
-      images: [image]
+      images: [
+        {
+          public_id: image.public_id,
+          url: image.url
+        }
+      ]
     }
 
-    createProductMutation.mutate(dataProduct)
+    if (currentData.type === 'add') {
+      createProductMutation.mutate(dataProduct)
+    }
+
+    if (currentData.type === 'edit') {
+      editProductMutation.mutate({ ...dataProduct, _id: currentData?.currentData!._id })
+    }
   }
+  useEffect(() => {
+    // Boolean(currentData.currentData) === true bằng với cách viết  currentData.currentData
+    const { currentData: dataProduct } = currentData
+    if (currentData.type === 'edit' && Boolean(dataProduct) === true) {
+      form.setFieldsValue({
+        nameProduct: dataProduct?.nameProduct,
+        price: dataProduct?.price,
+        brand: dataProduct?.brand._id,
+        category: dataProduct?.category._id,
+        sale: dataProduct?.sale,
+        status: dataProduct?.status === 'active' ? true : false,
+        sizes: dataProduct?.sizes,
+        desc: dataProduct?.desc
+      })
+      setImage({
+        url: dataProduct?.images[0].url ?? '',
+        public_id: dataProduct?.images[0].public_id ?? '',
+        visiable: true
+      })
+    }
+  }, [currentData, form])
+  // có 3 trường hợp
+  // [] => thực hiện lại useEffect 1 lần
+  // [currentData] => currentData có thay đổi => useEffect sẽ thực hiện lại logic
+  // không truyền gì có => request liiên tục vào useEffect
+
   return (
     <Drawer
-      title='Thêm sản phẩm'
+      title={currentData.type === 'add' ? 'Thêm sản phẩm' : 'Cập nhật lại sản phẩm'}
       onClose={onClose}
       open={currentData.visiable}
       width={800}
@@ -179,7 +236,7 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
             disabled={createProductMutation.isLoading}
             loading={createProductMutation.isLoading}
           >
-            Thêm sản phẩm
+            {currentData.type === 'add' ? 'Thêm sản phẩm' : 'Cập nhật lại sản phẩm'}
           </Button>
         </Space>
       }
@@ -330,6 +387,9 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
                 <p className='ant-upload-text'>Click hoặc kéo thả hình ảnh</p>
               </Dragger>
             </Form.Item>
+            {image.visiable && (
+              <Image src={image.url} alt={image.public_id} className='!w-[120px] !h-[120px] rounded-md' />
+            )}
           </Col>
         </Row>
       </Form>
