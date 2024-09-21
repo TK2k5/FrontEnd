@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import {
   Button,
   Col,
@@ -28,20 +26,20 @@ import {
 import { TModal, TResponse } from '@/types/common.type'
 import { TProduct, TProductForm, TProductFormEdit } from '@/types/product.type'
 import { addProduct, editProduct } from '@/apis/product.api'
-import { useEffect, useState } from 'react'
+import { SetStateAction, useEffect, useState } from 'react'
 
 import { ArrowDownSmallIcon } from '@/components/icons'
-import QuillEditor from '@/components/quill-editor'
 import { getBrands } from '@/apis/brand.api'
 import { getCategories } from '@/apis/category.api'
 import { uploadImage } from '@/apis/upload-image.api'
 import { useAuth } from '@/contexts/auth-context'
 import { useQueryParams } from '@/hooks/useQueryParams'
+import QuillEditor from '@/components/quill-editor'
 
 interface IFormProductProps {
   currentData: TModal<TProduct>
   onClose: () => void
-  refetch: <TPageData>(
+  refetch?: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
   ) => Promise<QueryObserverResult<TResponse<TProduct>, Error>>
 }
@@ -54,19 +52,12 @@ interface Image {
 
 const { Dragger } = Upload
 
-const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
+const FomrProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
+  console.log('🚀 ~ FomrProduct ~ currentData:', currentData)
   const { accessToken } = useAuth()
   const queryParams = useQueryParams()
-
   const [form] = Form.useForm()
   const queryClient = new QueryClient()
-
-  const [paginate, setPaginate] = useState({
-    _page: 1,
-    _limit: 10,
-    totalPages: 1
-  })
-  const [query, setQuery] = useState<string>(`?_page=${paginate._page}&_limit=${paginate._limit}`)
 
   const createProductMutation = useMutation({
     mutationKey: ['createProduct'],
@@ -77,7 +68,7 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
       form.resetFields()
       setImage({ url: '', public_id: '', visiable: false })
       setValue('')
-      refetch()
+      refetch && refetch()
       queryClient.invalidateQueries({ queryKey: ['products', queryParams] })
     },
     onError: () => {
@@ -94,7 +85,7 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
       form.resetFields()
       setImage({ url: '', public_id: '', visiable: false })
       setValue('')
-      refetch()
+      refetch && refetch()
       queryClient.invalidateQueries({ queryKey: ['products', queryParams] })
     },
     onError: () => {
@@ -134,7 +125,6 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
           })
       }
     },
-    action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
     onChange(info) {
       const { status } = info.file
       if (status !== 'uploading') {
@@ -151,6 +141,7 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
     }
   }
 
+  // categories
   const { data, isLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories(accessToken),
@@ -192,6 +183,7 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
       editProductMutation.mutate({ ...dataProduct, _id: currentData?.currentData!._id })
     }
   }
+
   useEffect(() => {
     // Boolean(currentData.currentData) === true bằng với cách viết  currentData.currentData
     const { currentData: dataProduct } = currentData
@@ -241,160 +233,166 @@ const FormProduct = ({ currentData, onClose, refetch }: IFormProductProps) => {
         </Space>
       }
     >
-      <Form layout='vertical' form={form} onFinish={onSubmit}>
-        <Row gutter={40}>
-          <Col span={12}>
-            <Form.Item
-              name={'nameProduct'}
-              label='Tên sản phẩm'
-              rules={[{ required: true, message: 'Tên sản phẩm là bắt buộc' }]}
-            >
-              <Input size='large' placeholder='Tên sản phẩm' />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name={'price'}
-              label='Giá sản phẩm'
-              rules={[{ required: true, message: 'Giá sản phẩm là bắt buộc' }]}
-            >
-              <InputNumber className='w-full' size='large' placeholder='Giá sản phẩm' />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name={'brand'}
-              label='Thương hiệu sản phẩm'
-              rules={[{ required: true, message: 'Thương hiệu sản phẩm là bắt buộc' }]}
-            >
-              <Select
-                loading={isLoadingBrand}
-                size='large'
-                suffixIcon={<ArrowDownSmallIcon />}
-                placeholder='Thương hiệu sản phẩm'
-                options={brands?.map((brand) => ({
-                  value: brand._id,
-                  label: brand.nameBrand
-                }))}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name={'category'}
-              label='Danh mục sản phẩm'
-              rules={[{ required: true, message: 'Danh mục sản phẩm là bắt buộc' }]}
-            >
-              <Select
-                loading={isLoading}
-                size='large'
-                suffixIcon={<ArrowDownSmallIcon />}
-                placeholder='Danh mục sản phẩm'
-                options={categories?.map((category) => ({
-                  value: category._id,
-                  label: category.nameCategory
-                }))}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name={'sale'}
-              label='Giá khuyến mại sản phẩm'
-              rules={[
-                // giá khuyến mại luôn nhỏ hơn giá sản phẩm
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    const price = getFieldValue('price')
-                    if (!value || value < price) {
-                      return Promise.resolve()
+      {currentData.type === 'view' ? (
+        'ahihi'
+      ) : (
+        <Form layout='vertical' form={form} onFinish={onSubmit}>
+          <Row gutter={40}>
+            <Col span={12}>
+              <Form.Item
+                name={'nameProduct'}
+                label='Tên sản phẩm'
+                rules={[{ required: true, message: 'Tên sản phẩm là bắt buộc' }]}
+              >
+                <Input size='large' placeholder='Tên sản phẩm' />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name={'price'}
+                label='Giá sản phẩm'
+                rules={[{ required: true, message: 'Giá sản phẩm là bắt buộc' }]}
+              >
+                <InputNumber className='w-full' size='large' placeholder='Giá sản phẩm' />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name={'brand'}
+                label='Thương hiệu sản phẩm'
+                rules={[{ required: true, message: 'Thương hiệu sản phẩm là bắt buộc' }]}
+              >
+                <Select
+                  loading={isLoadingBrand}
+                  size='large'
+                  suffixIcon={<ArrowDownSmallIcon />}
+                  placeholder='Thương hiệu sản phẩm'
+                  options={brands?.map((brand) => ({
+                    value: brand._id,
+                    label: brand.nameBrand
+                  }))}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name={'category'}
+                label='Danh mục sản phẩm'
+                rules={[{ required: true, message: 'Danh mục sản phẩm là bắt buộc' }]}
+              >
+                <Select
+                  loading={isLoading}
+                  size='large'
+                  suffixIcon={<ArrowDownSmallIcon />}
+                  placeholder='Danh mục sản phẩm'
+                  options={categories?.map((category) => ({
+                    value: category._id,
+                    label: category.nameCategory
+                  }))}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                name={'sale'}
+                label='Giá khuyến mại sản phẩm'
+                rules={[
+                  // giá khuyến mại luôn nhỏ hơn giá sản phẩm
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      const price = getFieldValue('price')
+                      if (!value || value < price) {
+                        return Promise.resolve()
+                      }
+                      return Promise.reject(new Error('Giá khuyến mại phải nhỏ hơn giá sản phẩm'))
                     }
-                    return Promise.reject(new Error('Giá khuyến mại phải nhỏ hơn giá sản phẩm'))
-                  }
-                })
-              ]}
-            >
-              <InputNumber className='w-full' size='large' placeholder='Giá khuyến mại sản phẩm' />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name={'status'} label='Trạng thái sản phẩm'>
-              <Switch />
-            </Form.Item>
-          </Col>
+                  })
+                ]}
+              >
+                <InputNumber className='w-full' size='large' placeholder='Giá khuyến mại sản phẩm' />
+              </Form.Item>
+            </Col>
 
-          <Col span={24}>
-            <Form.Item label='Size sản phẩm' className='!mb-0' rules={[{ required: true, message: 'Size sản phẩm' }]}>
-              <Form.List name='sizes'>
-                {(fields, { add, remove }) => (
-                  <>
-                    {fields.map(({ key, name, ...restField }) => (
-                      <Space key={key} style={{ display: 'flex' }} align='baseline'>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'size']}
-                          rules={[{ required: true, message: 'Size sản phẩm' }]}
-                        >
-                          <Input size='large' placeholder='Size sản phẩm' />
-                        </Form.Item>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'quantity']}
-                          rules={[{ required: true, message: 'Số lượng' }]}
-                        >
-                          <InputNumber className='w-full' size='large' placeholder='Số lượng' />
-                        </Form.Item>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'color']}
-                          rules={[{ required: true, message: 'Màu sản phẩm' }]}
-                        >
-                          <Input size='large' placeholder='Màu sản phẩm' />
-                        </Form.Item>
-                        <CloseOutlined onClick={() => remove(name)} />
-                      </Space>
-                    ))}
-                    <Form.Item>
-                      <Button type='dashed' size='large' onClick={() => add()} block icon={<PlusOutlined />}>
-                        Add field
-                      </Button>
-                    </Form.Item>
-                  </>
-                )}
-              </Form.List>
-            </Form.Item>
-          </Col>
+            <Col span={12}>
+              <Form.Item name={'status'} label='Trạng thái sản phẩm'>
+                <Switch />
+              </Form.Item>
+            </Col>
 
-          {/* desc */}
-          <Col span={24}>
-            <Form.Item name={'desc'} label='Mô tả sản phẩm'>
-              {/* <Input.TextArea size='large' placeholder='Mô tả sản phẩm' /> */}
-              <QuillEditor value={value} onChange={(value) => setValue(value)} />
-            </Form.Item>
-          </Col>
+            <Col span={24}>
+              <Form.Item label='Size sản phẩm' className='!mb-0' rules={[{ required: true, message: 'Size sản phẩm' }]}>
+                <Form.List name='sizes'>
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }) => (
+                        <Space key={key} style={{ display: 'flex' }} align='baseline'>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'size']}
+                            rules={[{ required: true, message: 'Size sản phẩm' }]}
+                          >
+                            <Input size='large' placeholder='Size sản phẩm' />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'quantity']}
+                            rules={[{ required: true, message: 'Số lượng' }]}
+                          >
+                            <InputNumber className='w-full' size='large' placeholder='Số lượng' />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'color']}
+                            rules={[{ required: true, message: 'Màu sản phẩm' }]}
+                          >
+                            <Input size='large' placeholder='Màu sản phẩm' />
+                          </Form.Item>
+                          <CloseOutlined onClick={() => remove(name)} />
+                        </Space>
+                      ))}
+                      <Form.Item>
+                        <Button type='dashed' size='large' onClick={() => add()} block icon={<PlusOutlined />}>
+                          Add field
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
+              </Form.Item>
+            </Col>
 
-          {/* image */}
-          <Col span={24}>
-            <Form.Item
-              name={'images'}
-              label='Hình ảnh sản phẩm'
-              rules={[{ required: true, message: 'Hình ảnh sản phẩm là bắt buộc' }]}
-            >
-              <Dragger {...props}>
-                <p className='ant-upload-drag-icon'>
-                  <InboxOutlined />
-                </p>
-                <p className='ant-upload-text'>Click hoặc kéo thả hình ảnh</p>
-              </Dragger>
-            </Form.Item>
-            {image.visiable && (
-              <Image src={image.url} alt={image.public_id} className='!w-[120px] !h-[120px] rounded-md' />
-            )}
-          </Col>
-        </Row>
-      </Form>
+            {/* desc */}
+            <Col span={24}>
+              <Form.Item name={'desc'} label='Mô tả sản phẩm'>
+                <QuillEditor value={value} onChange={(value: SetStateAction<string>) => setValue(value)} />
+              </Form.Item>
+            </Col>
+
+            {/* image */}
+            <Col span={24}>
+              <Form.Item
+                name={'images'}
+                label='Hình ảnh sản phẩm'
+                rules={[{ required: true, message: 'Hình ảnh sản phẩm là bắt buộc' }]}
+              >
+                <Dragger {...props}>
+                  <p className='ant-upload-drag-icon'>
+                    <InboxOutlined />
+                  </p>
+                  <p className='ant-upload-text'>Click hoặc kéo thả hình ảnh</p>
+                </Dragger>
+              </Form.Item>
+
+              {image.visiable && (
+                <Image src={image.url} alt={image.public_id} className='!w-[120px] !h-[120px] rounded-md' />
+              )}
+            </Col>
+          </Row>
+        </Form>
+      )}
     </Drawer>
   )
 }
 
-export default FormProduct
+export default FomrProduct

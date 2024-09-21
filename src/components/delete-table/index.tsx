@@ -1,15 +1,15 @@
 import { Button, Modal } from 'antd'
 
-import { DeleteOutlined } from '@ant-design/icons'
-import { useMemo } from 'react'
-import { cn } from '@/utils/cn'
 import { ArrowRestoreIcon } from '../icons'
+import { DeleteOutlined } from '@ant-design/icons'
+import { cn } from '@/utils/cn'
+import { useMemo } from 'react'
 
-interface DeleteTableProps<T> {
+interface DeleteTableProps<T extends { is_deleted?: boolean }> {
   rowSelections: T[]
   setOpenModalDelete: (value: boolean) => void
   openModalDelete: boolean
-  handleDelete: (values: T[] | T, isdeleted?: boolean) => void
+  handleDelete: (values: T[] | T, is_deleted?: boolean) => void
   selectionSingle?: T
   text: {
     title: string
@@ -18,7 +18,7 @@ interface DeleteTableProps<T> {
   type?: 'delete' | 'restore'
 }
 
-const DeleteTable = <T,>({
+const DeleteTable = <T extends { is_deleted?: boolean }>({
   handleDelete,
   openModalDelete,
   rowSelections,
@@ -27,7 +27,8 @@ const DeleteTable = <T,>({
   text,
   type
 }: DeleteTableProps<T>) => {
-  const checkStatus = useMemo(() => rowSelections.every((item) => item.is_delete), [rowSelections])
+  const checkStatus = useMemo(() => rowSelections.every((item) => item.is_deleted), [rowSelections])
+
   return (
     <>
       {rowSelections.length > 0 && (
@@ -76,8 +77,9 @@ const DeleteTable = <T,>({
                 setOpenModalDelete(false)
                 handleDelete(
                   selectionSingle && rowSelections.length === 0 ? selectionSingle : rowSelections,
-                  checkStatus && type === 'restore' ? false : true
-                )              }}
+                  checkStatus ? false : true
+                )
+              }}
             >
               {text.title}
             </Button>

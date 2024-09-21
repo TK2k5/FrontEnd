@@ -1,28 +1,29 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { TModalType, TQueryParams } from '@/types/common.type'
 import { Table, notification } from 'antd'
 import { createSearchParams, useNavigate } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import ColumnsTable from './table/columns-table'
 import DeleteTable from '@/components/delete-table'
+import FomrProduct from './form/form-product'
 import { TProduct } from '@/types/product.type'
 import { softDeleteMultipleProduct } from '@/apis/product.api'
 import { useAuth } from '@/contexts/auth-context'
-import { useMutation } from '@tanstack/react-query'
 import { useQueryParams } from '@/hooks/useQueryParams'
 import { useState } from 'react'
+import { useToggleModal } from '@/hooks/useToggleModal'
 
 interface MainProductProps {
-  // columns: TableColumnsType<TProduct>
   products: TProduct[]
   totalDocs: number
   isLoading?: boolean
-  getData?: (type: TModalType, data?: TProduct | undefined) => void
+  getData?: (type: TModalType, data?: TProduct) => void
 }
 
 const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductProps) => {
   const navigate = useNavigate()
+
+  const queryClient = useQueryClient()
   const queryParams: TQueryParams = useQueryParams()
   const { _limit, _page } = queryParams
 
@@ -31,6 +32,8 @@ const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductPro
   const [openModalDelete, setOpenModalDelete] = useState<boolean>(false)
   const [rowSelections, setRowSelections] = useState<TProduct[]>([])
   const [product, setProduct] = useState<TProduct>()
+  const { currentModal, onCloseModal, onOpenModal } = useToggleModal<TProduct>()
+  console.log('🚀 ~ MainProduct ~ product:', product)
 
   const deleteMultipleMutation = useMutation({
     mutationKey: ['deleteMultipleProduct'],
@@ -42,6 +45,7 @@ const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductPro
         message: `${isCheckRestore ? 'Khôi phục' : 'Xoá'} sản phẩm thành công`,
         description: `Sản phẩm đã được ${isCheckRestore ? 'khôi phục thành công' : 'xoá vào thùng rác'}`
       })
+      queryClient.invalidateQueries({ queryKey: ['products', queryParams] })
     },
     onError: () => {
       notification.error({
@@ -50,8 +54,8 @@ const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductPro
       })
     }
   })
+
   const handleDelete = (values: TProduct[] | TProduct, is_deleted?: boolean) => {
-    console.log(values, is_deleted)
     if (Array.isArray(values)) {
       const ids = values.map((item) => item._id)
       deleteMultipleMutation.mutate({ id: ids, is_deleted })
@@ -71,7 +75,8 @@ const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductPro
     setOpenModalDelete,
     onDetail: setProduct,
     rowSelections,
-    getData
+    getData,
+    onOpenModal
   })
 
   return (
@@ -90,8 +95,6 @@ const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductPro
           pageSize: Number(_limit) || 8,
           total: totalDocs,
           onChange: (page, pageSize) => {
-            console.log('🚀 ~ MainProduct ~ page:', page)
-            // onChange(page),
             navigate({
               pathname: '/products',
               search: createSearchParams({
@@ -109,6 +112,8 @@ const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductPro
           }
         }}
       />
+
+      <FomrProduct currentData={currentModal} onClose={onCloseModal} />
 
       <DeleteTable
         handleDelete={(values, is_deleted) => handleDelete(values, is_deleted)}

@@ -47,3 +47,8 @@ export type TQueryParams = {
   status?: string
   deleted?: string
 }
+export type TResponseDetail<Data> = {
+  message: string
+  success: boolean
+  data: Data
+}

@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { TModal, TModalType } from '@/types/common.type'
 
 import { useState } from 'react'
 
 export const useToggleModal = <T>() => {
   const [currentModal, setCurrentModal] = useState<TModal<T>>({
-    visiable: false,
+    visiable: false, // trạng thái ẩn hiện
     type: null,
     currentData: null
   })
@@ -20,8 +18,8 @@ export const useToggleModal = <T>() => {
           currentData: null
         })
         break
-
       case 'edit':
+      case 'view':
         setCurrentModal({
           type,
           visiable: true,

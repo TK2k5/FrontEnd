@@ -1,4 +1,4 @@
-import { TBaseResponseDelete, TQueryParams, TResponse } from '@/types/common.type'
+import { TBaseResponseDelete, TQueryParams, TResponse, TResponseDetail } from '@/types/common.type'
 import { TProduct, TProductForm, TProductFormEdit } from '@/types/product.type'
 
 import api from './base-url.api'
@@ -86,4 +86,10 @@ export const editProduct = async (data: TProductFormEdit, token: string) => {
   })
 
   return reponse.data
+}
+
+// xem chi tiết sản phẩm
+export const getProduct = async (id: string) => {
+  const response = await api.get<TResponseDetail<TProduct>>(`/product/${id}`)
+  return response.data
 }

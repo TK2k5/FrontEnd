@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
+import { ArrowRestoreIcon, EyeIcon } from '@/components/icons'
 import { ClearOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { Link } from 'react-router-dom'
 import { TCategroyRefProduct, TProduct, TSize } from '@/types/product.type'
 import { TImage, TModalType } from '@/types/common.type'
 import { TableColumnsType, Tag, Tooltip } from 'antd'
 
-import { ArrowRestoreIcon } from '@/components/icons'
 import { cn } from '@/utils/cn'
 
 interface ColumnsTableProps {
@@ -13,10 +12,19 @@ interface ColumnsTableProps {
   onDetail?: (record: TProduct) => void
   setOpenModalDelete?: (value: boolean) => void
   rowSelections?: TProduct[]
-  getData?: (type: TModalType, data?: TProduct | undefined) => void
+  getData?: (type: TModalType, data?: TProduct) => void
+  onOpenModal?: (type: TModalType, data?: TProduct) => void
 }
 
-const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections, getData }: ColumnsTableProps) => {
+const ColumnsTable = ({
+  onDelete,
+  setOpenModalDelete,
+  onDetail,
+  rowSelections,
+  getData,
+  onOpenModal
+}: ColumnsTableProps) => {
+  // const navigate = useNavigate()
   const columns: TableColumnsType<TProduct> = [
     {
       title: 'Thông tin sản phẩm',
@@ -71,7 +79,6 @@ const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections, g
       key: 'status',
       render: (_: string, record: TProduct) => {
         const { status, is_deleted } = record
-
         return (
           <Tag color={is_deleted ? 'red' : 'green'}>
             {status === 'inactive' && !is_deleted && 'Không hoạt động'}
@@ -126,6 +133,14 @@ const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections, g
                     <ArrowRestoreIcon />
                   </button>
                 </Tooltip>
+                <Tooltip title={'Xem chi tiết sản phẩm'}>
+                  <Link
+                    to={`/product/${record._id}`}
+                    className='flex items-center h-8 px-4 border border-r-0 border-gray-400 rounded-none'
+                  >
+                    <EyeIcon height={20} width={20} />
+                  </Link>
+                </Tooltip>
                 <Tooltip title={'Xoá vĩnh viễn'}>
                   <button
                     disabled={rowSelections && rowSelections.length > 0}
@@ -145,10 +160,18 @@ const ColumnsTable = ({ onDelete, setOpenModalDelete, onDetail, rowSelections, g
               <>
                 <Tooltip title={'Cập nhật sản phẩm'}>
                   <button
-                    className='h-8 px-4 border border-r-0 border-gray-400 rounded-r-none rounded-l-md'
+                    className='h-8 px-4 border border-r-0 border-gray-400 rounded-r-none rounded-l-md '
                     onClick={() => getData && getData('edit', record)}
                   >
                     <EditOutlined height={20} width={20} />
+                  </button>
+                </Tooltip>
+                <Tooltip title={'Xem chi tiết sản phẩm'}>
+                  <button
+                    className='h-8 px-4 border border-r-0 border-gray-400 rounded-none '
+                    onClick={() => onOpenModal && onOpenModal('view', record)}
+                  >
+                    <EyeIcon height={20} width={20} />
                   </button>
                 </Tooltip>
                 <Tooltip title={'Xoá sản phẩm'}>
