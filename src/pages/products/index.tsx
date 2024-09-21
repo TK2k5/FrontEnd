@@ -96,6 +96,18 @@ const ProductPage = () => {
           }).toString()
         })
         break
+      case '4':
+        const newQueryParams = _.omit(queryParams, 'status')
+        navigate({
+          pathname: '/products',
+          search: createSearchParams({
+            ...newQueryParams,
+            _page: '1',
+            deleted: 'true',
+            tab: key
+          }).toString()
+        })
+        break
       default:
         navigate({
           pathname: '/products',

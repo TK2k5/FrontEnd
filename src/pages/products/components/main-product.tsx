@@ -34,26 +34,29 @@ const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductPro
 
   const deleteMultipleMutation = useMutation({
     mutationKey: ['deleteMultipleProduct'],
-    mutationFn: (id: string) => softDeleteMultipleProduct(id, accessToken),
-    onSuccess: () => {
+    mutationFn: (params: { id: string | string[]; is_deleted?: boolean }) =>
+      softDeleteMultipleProduct(params, accessToken),
+    onSuccess: (data) => {
+      const isCheckRestore = data.message === 'Restore product success!'
       notification.success({
-        message: 'Xoá sản phẩm thành công',
-        description: 'Sản phẩm đã được xoá vào thùng rác'
+        message: `${isCheckRestore ? 'Khôi phục' : 'Xoá'} sản phẩm thành công`,
+        description: `Sản phẩm đã được ${isCheckRestore ? 'khôi phục thành công' : 'xoá vào thùng rác'}`
       })
     },
     onError: () => {
       notification.error({
-        message: 'Xoá sản phẩm thất bại',
-        description: 'Có lỗi xảy ra khi xoá sản phẩm'
+        message: 'Thao tác thất bại!',
+        description: 'Có lỗi xảy ra khi xử lý sản phẩm'
       })
     }
   })
-  const handleDelete = (values: TProduct[] | TProduct) => {
+  const handleDelete = (values: TProduct[] | TProduct, is_deleted?: boolean) => {
+    console.log(values, is_deleted)
     if (Array.isArray(values)) {
-      const ids = values.map((item) => `&id=${item._id}`).join('')
-      deleteMultipleMutation.mutate(ids)
+      const ids = values.map((item) => item._id)
+      deleteMultipleMutation.mutate({ id: ids, is_deleted })
     } else {
-      deleteMultipleMutation.mutate(`&id=${values._id}`)
+      deleteMultipleMutation.mutate({ id: values._id, is_deleted })
     }
   }
 
@@ -108,7 +111,7 @@ const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductPro
       />
 
       <DeleteTable
-        handleDelete={handleDelete}
+        handleDelete={(values, is_deleted) => handleDelete(values, is_deleted)}
         openModalDelete={openModalDelete}
         rowSelections={rowSelections}
         setOpenModalDelete={setOpenModalDelete}
@@ -117,6 +120,7 @@ const MainProduct = ({ products, isLoading, getData, totalDocs }: MainProductPro
           title: 'Xoá sản phẩm',
           content: 'Bạn có chắc chắn muốn xoá sản phẩm này không? Hành động này không thể hoàn tác?'
         }}
+        type={queryParams?.deleted === 'true' ? 'restore' : 'delete'}
       />
     </div>
   )
