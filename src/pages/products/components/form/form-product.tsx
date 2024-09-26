@@ -15,7 +15,7 @@ import {
   message
 } from 'antd'
 import { CloseOutlined, InboxOutlined, PlusOutlined } from '@ant-design/icons'
-import { Image as ImageType, TModal, TResponse } from '@/types/common.type'
+import { ImageType, TModal, TResponse } from '@/types/common.type'
 import {
   QueryClient,
   QueryObserverResult,

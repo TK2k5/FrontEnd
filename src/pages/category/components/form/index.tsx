@@ -1,26 +1,43 @@
-import { Button, Drawer, Form, Input, Space, Upload, UploadProps, message } from 'antd'
-import { Image, TModal } from '@/types/common.type'
+import { Button, Drawer, Form, Image, Input, Space, Upload, UploadProps, message } from 'antd'
+import { ImageType, TModal } from '@/types/common.type'
 import { TCategory, TFormCategory } from '@/types/category.type'
+import { createCategory, updateCategory } from '@/apis/category.api'
+import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { InboxOutlined } from '@ant-design/icons'
 import QuillEditor from '@/components/quill-editor'
-import { createCategory } from '@/apis/category.api'
 import { uploadImage } from '@/apis/upload-image.api'
 import { useAuth } from '@/contexts/auth-context'
 import { useForm } from 'antd/es/form/Form'
-import { useState } from 'react'
 
 interface IFormCategory {
   currentData: TModal<TCategory>
   onClose: () => void
 }
+
 const { Dragger } = Upload
+
 const FormCategory = ({ currentData, onClose }: IFormCategory) => {
   const { accessToken } = useAuth()
   const [value, setValue] = useState<string>('')
-  const [image, setImage] = useState<Image>({ url: '', public_id: '', visiable: false })
+  const [image, setImage] = useState<ImageType>({ url: '', public_id: '', visiable: false })
   const queryClient = useQueryClient()
+
+  const updateCategoryMutation = useMutation({
+    mutationKey: ['update-category'],
+    mutationFn: (body: TCategory) => updateCategory(body, accessToken),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      message.success('Update category successfully!')
+      form.resetFields()
+      onClose()
+    },
+    onError: () => {
+      message.error('Update category failed!')
+    }
+  })
+
   const props: UploadProps = {
     name: 'file',
     multiple: false,
@@ -30,8 +47,10 @@ const FormCategory = ({ currentData, onClose }: IFormCategory) => {
     async customRequest({ file, onSuccess, onError }) {
       const formData = new FormData()
       formData.append('images', file)
+
       const response = await uploadImage(formData, accessToken)
-      const urlInfo: Image = response.data.urls[0]
+      const urlInfo: ImageType = response.data.urls[0]
+
       if (urlInfo) {
         setImage({
           url: urlInfo.url,
@@ -59,30 +78,66 @@ const FormCategory = ({ currentData, onClose }: IFormCategory) => {
       console.log('Dropped files', e.dataTransfer.files)
     }
   }
+
   const [form] = useForm()
+
   const createCategoryMutation = useMutation({
     mutationKey: ['create-category'],
     mutationFn: (body: TFormCategory) => createCategory(body, accessToken),
     onSuccess: () => {
       message.success('Thêm danh mục thành công!')
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+      form.resetFields()
+      onClose()
     },
     onError: () => {
       message.error('Thêm danh mục thất bại!')
     }
   })
+
   const handleSubmit = (value: TFormCategory) => {
     const bodyData: TFormCategory = {
       nameCategory: value.nameCategory,
       image: image.url,
       desc: value.desc || ''
     }
-    createCategoryMutation.mutate(bodyData)
+
+    if (currentData.type === 'add') {
+      createCategoryMutation.mutate(bodyData)
+    }
+
+    if (currentData.type === 'edit' && currentData.currentData) {
+      const { currentData: category } = currentData
+      updateCategoryMutation.mutate({
+        ...category,
+        ...bodyData
+      })
+    }
   }
+
+  useEffect(() => {
+    if (currentData.type === 'edit') {
+      const { currentData: category } = currentData
+      // const category2 = currentData.currentData
+      form.setFieldsValue({
+        nameCategory: category?.nameCategory ?? '',
+        desc: category?.desc ?? ''
+      })
+      setImage({
+        public_id: category?.image ?? '',
+        visiable: true,
+        url: category?.image ?? ''
+      })
+    }
+  }, [currentData, form])
+
   return (
     <Drawer
       title={currentData.type === 'add' ? 'Thêm danh mục' : 'Cập nhật lại danh mục'}
-      onClose={onClose}
+      onClose={() => {
+        onClose()
+        form.resetFields()
+      }}
       open={currentData.visiable}
       width={800}
       extra={
@@ -110,9 +165,11 @@ const FormCategory = ({ currentData, onClose }: IFormCategory) => {
         >
           <Input placeholder='Tên danh mục' size='large' />
         </Form.Item>
-        <Form.Item name={'desc'} label='Mô tả danh mục'>
+
+        <Form.Item name={'desc'} label='Mô tả danh mục' rules={[{ required: true, message: 'Mô tả là bắt buộc' }]}>
           <QuillEditor value={value} onChange={(value) => setValue(value)} />
         </Form.Item>
+
         <Form.Item
           name={'image'}
           label='Hình ảnh danh mục'
@@ -125,8 +182,14 @@ const FormCategory = ({ currentData, onClose }: IFormCategory) => {
             <p className='ant-upload-text'>Click hoặc kéo thả hình ảnh</p>
           </Dragger>
         </Form.Item>
+        {currentData.type === 'edit' && image.visiable && (
+          <div>
+            <Image width={120} height={120} className='!rounded-md object-cover' src={image.url} alt={image.url} />
+          </div>
+        )}
       </Form>
     </Drawer>
   )
 }
+
 export default FormCategory
