@@ -1,10 +1,10 @@
 import { ArrowRestoreIcon, EyeIcon } from '@/components/icons'
 import { ClearOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { Link } from 'react-router-dom'
 import { TCategroyRefProduct, TProduct, TSize } from '@/types/product.type'
 import { TImage, TModalType } from '@/types/common.type'
 import { TableColumnsType, Tag, Tooltip } from 'antd'
 
+import { Link } from 'react-router-dom'
 import { cn } from '@/utils/cn'
 
 interface ColumnsTableProps {
