@@ -26,6 +26,13 @@ export type TImage = {
   _id: string
 }
 
+export interface Image {
+  url: string
+  public_id: string
+  visiable: boolean
+}
+
+
 export type TBaseResponseDelete = {
   message: string
   success: boolean

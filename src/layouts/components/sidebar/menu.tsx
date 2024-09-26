@@ -19,5 +19,11 @@ export const menus = [
     title: 'Sản phẩm',
     icon: <AppstoreOutlined />,
     link: '/products'
+  },
+  {
+    id: 4,
+    title: 'Danh mục sản phẩm',
+    icon: <AppstoreOutlined />,
+    link: '/category'
   }
 ]

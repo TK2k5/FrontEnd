@@ -1,12 +1,13 @@
 import AuthLayout from '@/layouts/auth-layout'
+import CategoryPage from '@/pages/category'
 import HomePage from '@/pages'
 import IconPage from '@/pages/icons'
 import LoginPage from '@/pages/(authen)/login'
 import OrderPage from '@/pages/orders'
+import ProductDetail from '@/pages/products/[productId]'
 import ProductPage from '@/pages/products'
 import RootLayout from '@/layouts'
 import { createBrowserRouter } from 'react-router-dom'
-import ProductDetail from '@/pages/products/[productId]'
 
 const routes = createBrowserRouter([
   {
@@ -20,7 +21,8 @@ const routes = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'products', element: <ProductPage /> },
       { path: 'orders', element: <OrderPage /> },
-      { path: 'product/:productId', element: <ProductDetail /> }
+      { path: 'product/:productId', element: <ProductDetail /> },
+      { path: 'category', element: <CategoryPage /> }
     ]
   },
   {
