@@ -1,18 +1,49 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { useEffect, useState } from 'react'
+
 import { Button } from 'antd'
-import useCounter from '@/contexts/counter-context'
-import { useTranslation } from 'react-i18next'
+import { io } from 'socket.io-client'
 
 const HomePage = () => {
-  const { counter, handleIncrement, handleDecrement } = useCounter()
-  const { t } = useTranslation()
+  const [socketClient, setSocketClient] = useState<any>(null)
+
+  useEffect(() => {
+    const newSocket = io('http://localhost:8080')
+    setSocketClient(newSocket)
+  }, [])
+
+  // emit
+  // useEffect(() => {
+  //   if (!socketClient) return
+  //   socketClient.emit('messengers')
+  // }, [socketClient])
+
+  useEffect(() => {
+    if (!socketClient) return
+    socketClient.on('send-data', (data: any) => {
+      console.log('🚀 ~ socketClient.on ~ data:', data)
+    })
+  }, [socketClient])
+  useEffect(() => {
+    if (!socketClient) return
+    socketClient.on('add-product', (data: any) => {
+      console.log('🚀 ~ socketClient.on ~ data:', data)
+    })
+  }, [socketClient])
+
+  const handleAddProduct = () => {
+    const data = {
+      id: 1,
+      name: 'product ' + Math.round(Math.random() + 1000)
+    }
+
+    socketClient.emit('add-product', data)
+  }
 
   return (
     <div>
-      HomePage
-      <p>{t('title')}</p>
-      <p className='px-10'>Counter: {counter}</p>
-      <Button onClick={() => handleIncrement()}>Increment</Button>
-      <Button onClick={() => handleDecrement()}>Decrement</Button>
+      <Button onClick={handleAddProduct}>Add Product</Button>
     </div>
   )
 }
