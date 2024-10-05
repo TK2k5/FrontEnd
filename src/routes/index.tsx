@@ -3,32 +3,35 @@ import CategoryPage from '@/pages/category'
 import HomePage from '@/pages'
 import IconPage from '@/pages/icons'
 import LoginPage from '@/pages/(authen)/login'
+import Messagers from '@/pages/messagers'
 import OrderPage from '@/pages/orders'
 import ProductDetail from '@/pages/products/[productId]'
 import ProductPage from '@/pages/products'
 import RootLayout from '@/layouts'
 import { createBrowserRouter } from 'react-router-dom'
+import path from '@/configs/path'
 
 const routes = createBrowserRouter([
   {
-    path: '/icons',
+    path: path.icons,
     element: <IconPage />
   },
   {
-    path: '/',
+    path: path.home,
     element: <RootLayout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'products', element: <ProductPage /> },
-      { path: 'orders', element: <OrderPage /> },
-      { path: 'product/:productId', element: <ProductDetail /> },
-      { path: 'category', element: <CategoryPage /> }
+      { path: path.products, element: <ProductPage /> },
+      { path: path.orders, element: <OrderPage /> },
+      { path: path.productDetail, element: <ProductDetail /> },
+      { path: path.category, element: <CategoryPage /> },
+      { path: path.messagers, element: <Messagers /> }
     ]
   },
   {
-    path: '/auth',
+    path: path.auth,
     element: <AuthLayout />,
-    children: [{ path: 'login', element: <LoginPage /> }]
+    children: [{ path: path.login, element: <LoginPage /> }]
   }
 ])
 

@@ -6,6 +6,7 @@ import FormCategory from './components/form'
 import Navbar from '@/components/navbar'
 import { TCategory } from '@/types/category.type'
 import { Table } from 'antd'
+import path from '@/configs/path'
 import { useQueryParams } from '@/hooks/useQueryParams'
 import { useToggleModal } from '@/hooks/useToggleModal'
 
@@ -50,7 +51,7 @@ const CategoryPage = () => {
 
   const handleSearch = (nameCategory: string) => {
     navigate({
-      pathname: '/category',
+      pathname: path.category,
       search: createSearchParams({
         ...params,
         q: nameCategory
