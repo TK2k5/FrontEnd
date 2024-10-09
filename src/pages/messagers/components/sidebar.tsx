@@ -5,7 +5,7 @@ import path from '@/configs/path'
 import { useAuth } from '@/contexts/auth-context'
 import { useQuery } from '@tanstack/react-query'
 
-const Sidebar = ({ onJoinRoom }: { onJoinRoom: (roomId: string) => void }) => {
+const Sidebar = () => {
   const { accessToken } = useAuth()
 
   // get all rooms
@@ -29,7 +29,6 @@ const Sidebar = ({ onJoinRoom }: { onJoinRoom: (roomId: string) => void }) => {
                   roomId: room._id
                 }).toString()
               }}
-              onClick={() => onJoinRoom(room._id)}
               className='flex items-center gap-3 p-3 border-b rounded cursor-pointer hover:bg-gray-200'
               key={`${room._id}`}
             >

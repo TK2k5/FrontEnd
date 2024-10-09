@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { BodySendMessage, Message } from '@/types/message.type'
 import { Button, Empty } from 'antd'
 
@@ -37,6 +35,9 @@ const Content = ({ onSendMessage, messagers }: Props) => {
       room: roomId,
       sender: userInfo._id
     })
+
+    // reset lại valueInput = ''
+    setValueInput('')
   }
 
   return (
@@ -44,16 +45,21 @@ const Content = ({ onSendMessage, messagers }: Props) => {
       {(!messagers || messagers.length === 0) && <Empty />}
       {messagers &&
         messagers.length > 0 &&
-        messagers.map((chat, index) => {
+        messagers.map((chat) => {
+          const isCurrentUserLogin = userInfo._id === (chat.sender._id || chat.sender)
+
           return (
-            <div className={cn('flex items-center gap-3 p-3', { 'justify-end': false })} key={`${chat._id}`}>
+            <div
+              className={cn('flex items-start gap-3 p-3', { 'justify-end': isCurrentUserLogin })}
+              key={`${chat._id}`}
+            >
               <img
                 src={'https://picsum.photos/536/354'}
                 alt={chat.sender.email}
-                className={cn('h-[40px] w-[40px] rounded-full', { hidden: false })}
+                className={cn('h-[40px] w-[40px] rounded-full', { hidden: isCurrentUserLogin })}
               />
               <div
-                className={cn('flex flex-col gap-1', { 'items-end': false })}
+                className={cn('flex flex-col gap-1', { 'items-end': isCurrentUserLogin })}
                 title={dayjs().format('DD/MM/YYYY HH:mm:ss')}
               >
                 <p className='text-xs'>{dayjs(chat.createdAt).format('HH:mm')}</p>
@@ -61,7 +67,7 @@ const Content = ({ onSendMessage, messagers }: Props) => {
                   className={cn(
                     'p-2 bg-gray-100 rounded-md',
                     { 'w-2/3': chat.content.length > 150 },
-                    { 'bg-blue-100': false }
+                    { 'bg-blue-100': isCurrentUserLogin }
                   )}
                 >
                   <p

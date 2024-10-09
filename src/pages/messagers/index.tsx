@@ -1,10 +1,10 @@
 import { BodySendMessage, Message } from '@/types/message.type'
-import { useEffect, useState } from 'react'
+import { Socket, io } from 'socket.io-client'
+import { useEffect, useRef, useState } from 'react'
 
 import Content from './components/content'
 import Sidebar from './components/sidebar'
 import { getAllMessagers } from '@/apis/message.api'
-import { io } from 'socket.io-client'
 import { useAuth } from '@/contexts/auth-context'
 import { useQuery } from '@tanstack/react-query'
 import { useQueryParams } from '@/hooks/useQueryParams'
@@ -12,8 +12,23 @@ import { useQueryParams } from '@/hooks/useQueryParams'
 const Messagers = () => {
   const { roomId } = useQueryParams()
   const { accessToken } = useAuth()
-  const socket = io('http://localhost:8080')
 
+  const socketRef = useRef<null | Socket>(null)
+
+  // xử lý logic connect socket chỉ 1 lần
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io('http://localhost:8080')
+    }
+
+    // xoá bỏ connect khi thoát khỏi message
+    return () => {
+      socketRef.current?.disconnect()
+      socketRef.current = null
+    }
+  }, [])
+
+  // useRef
   const [messagers, setMessagers] = useState<Message[]>([])
 
   // get all messagers
@@ -30,25 +45,35 @@ const Messagers = () => {
   }, [dataMessagers])
 
   // tạo 1 hàm join room
-  const handleJoinRoom = (roomId: string) => {
-    socket.emit('join-room', roomId)
-  }
+  useEffect(() => {
+    if (roomId && socketRef.current) {
+      socketRef.current.emit('join-room', roomId)
+    }
+  }, [roomId])
 
   // tạo 1 hàm send message
   const handleSendMessage = (data: BodySendMessage) => {
-    socket.emit('send-message', data)
+    socketRef.current?.emit('send-message', data)
   }
 
   // tạo 1 hàm nhận message
   useEffect(() => {
-    socket.on('received-message', (data: Message) => {
-      setMessagers((prev) => [...prev, data])
-    })
+    if (socketRef.current) {
+      socketRef.current.on('received-message', (data: Message) => {
+        console.log('🚀 ~ socketRef.current.on ~ data:', data)
+        setMessagers((prev) => [...prev, data])
+      })
+    }
+
+    // dọn dẹp lại event
+    return () => {
+      socketRef.current?.off('received-message')
+    }
   }, [])
 
   return (
     <div className='grid h-full grid-cols-4'>
-      <Sidebar onJoinRoom={handleJoinRoom} />
+      <Sidebar />
 
       <Content onSendMessage={handleSendMessage} messagers={messagers} />
     </div>
