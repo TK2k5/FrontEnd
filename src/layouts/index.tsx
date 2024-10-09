@@ -7,7 +7,7 @@ import SideBar from './components/sidebar'
 const RootLayout = () => {
   return (
     <Layout className='h-screen'>
-      <Layout.Sider width='250px' className='!bg-white'>
+      <Layout.Sider width='250px' className='!bg-white hidden lg:block'>
         <SideBar />
       </Layout.Sider>
       <Layout>
